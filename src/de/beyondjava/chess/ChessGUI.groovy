@@ -24,7 +24,7 @@ start {
                 8.times { int column ->
                     8.times { int row ->
                         fields[row][column] = imageView(x: 60 + 90 * column, y: 60 + 90 * row,
-                                              onMouseClicked: {ChessMoveGUI.onClick(row, column, fields, brett, state, images)})
+                                              onMouseClicked: {brett=ChessMoveGUI.onClick(row, column, fields, brett, state, images)})
                     }
                 }
                 8.times {

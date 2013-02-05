@@ -11,53 +11,59 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Chessboard implements ChessConstants {
-    int[][] board;
-    boolean activePlayerIsWhite;
+    final int[][] board;
+    final boolean activePlayerIsWhite;
 
     public Chessboard() {
-        startGame();
-    }
-
-    public void startGame() {
         activePlayerIsWhite = true;
         board = ChessConstants.initialBoard;
+    }
+
+    public Chessboard(Chessboard oldBoard, int fromRow, int fromColumn, int toRow, int toColumn)
+    {
+        int[][] newBoard = new int[8][8];
+        for (int row = 0; row < 8; row++)
+        {
+            newBoard[row] = new int[8];
+            for (int y = 0; y < 8; y++)
+            {
+                int piece = oldBoard.board[row][y];
+                if (piece<0) piece=0; // forget en passant
+                newBoard[row][y]= piece;
+            }
+        }
+
+        if (oldBoard.board[toRow][toColumn]==-1)
+        {
+            // capture en passant
+            if (oldBoard.activePlayerIsWhite)
+            {
+                newBoard[fromRow][toColumn]=0;
+            }
+            else
+            {
+                newBoard[fromRow][toColumn]=0;
+            }
+        }
+        int piece = newBoard[fromRow][fromColumn];
+        if (piece == w_bauer)
+            if (fromRow - toRow == 2)
+                newBoard[fromRow - 1][toColumn] = -1; // make en passant possible in the opponents move
+        if (piece == s_bauer)
+            if (fromRow - toRow == -2)
+                newBoard[fromRow + 1][toColumn] = -1; // make en passant possible in the opponents move
+        newBoard[toRow][toColumn] = piece;
+        newBoard[fromRow][fromColumn] = 0;
+        board = newBoard;
+        activePlayerIsWhite = !oldBoard.activePlayerIsWhite;
     }
 
     public int getChessPiece(int row, int column) {
         return board[row][column];
     }
 
-    public void moveChessPiece(int fromRow, int fromColumn, int toRow, int toColumn) {
-        if (board[toRow][toColumn]==-1)
-        {
-            // en passant
-            if (activePlayerIsWhite)
-            {
-                board[fromRow][toColumn]=0;
-            }
-            else
-            {
-                board[fromRow][toColumn]=0;
-            }
-        }
-        forgetLastMovesEnPassant();
-        int piece = board[fromRow][fromColumn];
-        if (piece == w_bauer)
-            if (fromRow - toRow == 2)
-                board[fromRow - 1][toColumn] = -1; // en passant
-        if (piece == s_bauer)
-            if (fromRow - toRow == -2)
-                board[fromRow + 1][toColumn] = -1; // en passant
-        board[toRow][toColumn] = piece;
-        board[fromRow][fromColumn] = 0;
-         activePlayerIsWhite = !activePlayerIsWhite;
-    }
-
-    private void forgetLastMovesEnPassant() {
-        for (int i = 0; i < 8; i++) {
-            if (board[2][i] == -1) board[2][i] = 0;
-            if (board[5][i] == -1) board[5][i] = 0;
-        }
+    public Chessboard moveChessPiece(int fromRow, int fromColumn, int toRow, int toColumn) {
+        return new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
     }
 
     public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {

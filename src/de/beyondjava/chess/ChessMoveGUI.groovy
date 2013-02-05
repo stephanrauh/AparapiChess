@@ -29,7 +29,7 @@ class ChessMoveGUI {
         guiState.currentlyTouchedPieceX = -1
     }
 
-    public static void onClick(int row, int column, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
+    public static Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
         println "Hallo $row $column";
         int piece = brett.getChessPiece(row, column)
 
@@ -38,28 +38,25 @@ class ChessMoveGUI {
         } else if (guiState.currentlyTouchedPieceY == row && guiState.currentlyTouchedPieceX == column && piece > 1) {
             jadoube(row, column, fields, brett, guiState)
         } else if (guiState.currentlyTouchedPieceX >= 0 && guiState.currentlyTouchedPieceY >= 0) {
-            if (!move(guiState.currentlyTouchedPieceY, guiState.currentlyTouchedPieceX, row, column, fields, brett, guiState, images)) {
-                println brett.getChessPiece(row, column)
-            } else {
-                println "Impossible move!"
-            }
-
+            brett = move(guiState.currentlyTouchedPieceY, guiState.currentlyTouchedPieceX, row, column, fields, brett, guiState, images);
         } else {
             println "Can't figure out what you want"
         }
+        return brett;
     }
 
-    public static void move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
+    public static Chessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
         if (brett.isMovePossible(fromRow, fromColumn, toRow, toColumn)) {
             fields[fromRow][fromColumn].opacity = 1.0
             println "Move"
-            brett.moveChessPiece(fromRow, fromColumn, toRow, toColumn)
+            brett = brett.moveChessPiece(fromRow, fromColumn, toRow, toColumn)
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
             redraw(fields, brett, images)
         } else {
             println "Sorry, that's an illegal move"
         }
+        return brett;
     }
 
     public static void redraw(ImageView[][] fields, Chessboard brett, ChessImages images) {
