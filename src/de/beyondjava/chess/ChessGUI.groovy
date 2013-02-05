@@ -51,6 +51,13 @@ start {
                 }
 
             }
+            text(layoutX:0, layoutY:856, font:'10pt sanserif',
+                    text:'Legal notes:')
+            text(layoutX:0, layoutY:868, font:'10pt sanserif',
+                    text:'Source code by Stephan Rauh (www.beyondjava.net), published under GPL license. Use at your own risk.')
+            text(layoutX:0, layoutY:880, font:'10pt sanserif',
+                    text:'Images licenced under GPL licence (taken from http://commons.wikimedia.org/wiki/Category:SVG_chess_pieces/Standard)')
+            fill linearGradient(endX: 0, stops: [WHITE, WHITE])
         }
     }
     ChessMoveGUI.redraw(fields, brett, images)
