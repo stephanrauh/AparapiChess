@@ -11,16 +11,17 @@ public class Move {
     int fromColumn;
     int fromRow;
     int toColumn;
-
     int toRow;
+    int materialValueAfterMove;
 
 
-    public Move(int fromRow, int fromColumn, int toRow, int toColumn)
+    public Move(int fromRow, int fromColumn, int toRow, int toColumn, int materialValueAfterMove)
     {
         this.fromColumn=fromColumn;
         this.fromRow=fromRow;
         this.toRow=toRow;
         this.toColumn=toColumn;
+        this.materialValueAfterMove = materialValueAfterMove;
     }
 
 }

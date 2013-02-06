@@ -143,25 +143,36 @@ public class Chessboard implements ChessConstants {
 
     public boolean isKingThreatened(boolean whiteKing) {
         Chessboard test = new Chessboard(!whiteKing, this);
-        List<Move> possibleMoves = test.getLegalMoves();
+        List<Move> possibleMoves = test.getLegalMoves(false);
         for (Move m : possibleMoves) {
-            int piece = test.getChessPiece(m.toRow, m.toColumn);
-            if (whiteKing && piece == w_koenig)
+            System.out.println(m.materialValueAfterMove);
+            if (m.materialValueAfterMove>90000)
+            {
                 return true;
-            if ((!whiteKing) && piece == s_koenig)
+            }
+            if (m.materialValueAfterMove<-90000)
+            {
                 return true;
+            }
         }
         return false;
     }
 
-    public List<Move> getLegalMoves() {
+    public List<Move> getLegalMoves(boolean takeCheckIntoAccount) {
+        int currentMaterialValue = evalMaterialPositionFromWhitePointOfView();
         List<Move> moves = new ArrayList<>();
         for (int fromRow = 0; fromRow < 8; fromRow++)
-            for (int toColumn = 0; toColumn < 8; toColumn++) {
-                if (board[fromRow][toColumn] >= 2) {
-                    List<Position> targets = getLegalMovesForABishop(fromRow, toColumn);
+            for (int fromColumn = 0; fromColumn < 8; fromColumn++) {
+                if (board[fromRow][fromColumn] >= 2) {
+
+                    List<Position> targets = takeCheckIntoAccount?getLegalMovesForAPiece(fromRow, fromColumn):getLegalMovesForAPieceIgnoringCheck(fromRow, fromColumn);
                     for (Position t : targets) {
-                        Move m = new Move(fromRow, toColumn, t.row, t.column);
+                        int capturedPiece = board[t.row][t.column];
+                        int valueAfterMove = currentMaterialValue;
+                        if (capturedPiece>=2)
+                            valueAfterMove -= materialValue[capturedPiece];
+                        if (!activePlayerIsWhite) valueAfterMove = -valueAfterMove;
+                        Move m = new Move(fromRow, fromColumn, t.row, t.column, valueAfterMove);
                         moves.add(m);
                     }
                 }
@@ -169,7 +180,37 @@ public class Chessboard implements ChessConstants {
         return moves;
     }
 
+    public int evalMaterialPosition() {
+        int value = evalMaterialPositionFromWhitePointOfView();
+        if (!activePlayerIsWhite) return -value;
+        else return value;
+    }
+
+    public int evalMaterialPositionFromWhitePointOfView() {
+        int value = 0;
+        for (int fromRow = 0; fromRow < 8; fromRow++)
+            for (int toColumn = 0; toColumn < 8; toColumn++) {
+                int piece = board[fromRow][toColumn];
+                if (piece >= 2) {
+//                    System.out.println(toColumn + "," +fromRow + ": " +piece + "=" + materialValue[piece] );
+                    value += materialValue[piece];
+                }
+            }
+        return value;
+    }
+
     public List<Position> getLegalMovesForAPiece(int row, int column) {
+        List<Position> result = getLegalMovesForAPieceIgnoringCheck(row, column);
+        List<Position> r = new ArrayList<>(result.size());
+        for (Position p : result) {
+            Chessboard n = moveChessPiece(row, column, p.row, p.column);
+            if (!n.isKingThreatened(activePlayerIsWhite))
+                r.add(p);
+        }
+        return r;
+    }
+
+    private List<Position> getLegalMovesForAPieceIgnoringCheck(int row, int column) {
         List<Position> result = new ArrayList<Position>();
         int piece = board[row][column];
         if (isActivePlayersPiece(piece)) {
@@ -194,13 +235,7 @@ public class Chessboard implements ChessConstants {
                     break;
             }
         }
-        List<Position> r = new ArrayList<>(result.size());
-        for (Position p : result) {
-            Chessboard n = moveChessPiece(row, column, p.row, p.column);
-            if (!n.isKingThreatened(activePlayerIsWhite))
-                r.add(p);
-        }
-        return r;
+        return result;
     }
 
     private List<Position> getLegalMovesForAPawn(int row, int column) {
@@ -210,7 +245,11 @@ public class Chessboard implements ChessConstants {
         int direction = activePlayerIsWhite ? -1 : 1;
         nr = row + direction;
         nc = column;
-        if (board[nr][nc] == 0) {
+        if (nr<0 || nr>=8)
+        {
+            return result;
+        }
+        if ( isInsideBoard(nr, nc) && board[nr][nc] == 0) {
             result.add(new Position(nr, nc));
             if ((row == 6 && activePlayerIsWhite) || (row == 1 && (!activePlayerIsWhite))) {
                 // first move

@@ -31,5 +31,13 @@ public interface ChessConstants {
             {4, 4, 4, 4, 4, 4, 4, 4},
             {8, 12, 16, 20, 24, 16, 12, 8}
     };
+    public static final int[] materialValue = {0, 0, // empty fields
+            -100, -100, 100, 100, // pawns
+            -500, -500, 500, 500, // rooks,
+            -275, -275, 275, 275, // knights (Springer)
+            -325, -325, 325, 325, // bishops (Läufer)
+            -1000, -1000, 1000, 1000, // queens
+            -100000, -10000, 100000, 100000 // kings
+    };
 
 }
