@@ -147,11 +147,11 @@ public class Chessboard implements ChessConstants {
 
     public boolean isKingThreatened(boolean whiteKing) {
         Chessboard test = new Chessboard(!whiteKing, this);
-        System.out.println("--------------------------");
+//        System.out.println("--------------------------");
         List<Move> possibleMoves = test.getLegalMoves(false);
         for (Move m : possibleMoves) {
-            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
-            System.out.println(m.materialValueAfterMove);
+//            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
+//            System.out.println(m.materialValueAfterMove);
             if (m.materialValueAfterMove>90000)
             {
                 return true;
