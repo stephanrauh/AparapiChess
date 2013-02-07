@@ -5,10 +5,8 @@ import java.util.List;
 
 /**
  * Represents the chess board and provide a couple of methods on possible moves.
- * User: SoyYo
  * Date: 02.02.13
  * Time: 19:17
- * To change this template use File | Settings | File Templates.
  */
 public class Chessboard implements ChessConstants {
     final int[][] board;
@@ -22,6 +20,16 @@ public class Chessboard implements ChessConstants {
     public Chessboard(boolean activePlayerIsWhite, Chessboard board) {
         this.board = board.board;
         this.activePlayerIsWhite = activePlayerIsWhite;
+    }
+
+    public Chessboard(boolean activePlayerIsWhite, Piece... pieces)
+    {
+        this.activePlayerIsWhite=activePlayerIsWhite;
+        board = new int[8][8];
+        for (Piece p: pieces)
+        {
+            board[p.getRow()][p.getColumn()] = p.getPiece();
+        }
     }
 
 
@@ -130,11 +138,7 @@ public class Chessboard implements ChessConstants {
         if (!isInsideBoard(row, column)) return false;
         int piece = board[row][column];
         if (piece <= 0) return true;
-        if (((piece + 2) >> 2) == 6) // King
-        {
-            return false;
-        }
-        if (activePlayerIsWhite) {
+         if (activePlayerIsWhite) {
             return (isBlackPiece(piece));
         } else {
             return (isWhitePiece(piece));
@@ -143,8 +147,10 @@ public class Chessboard implements ChessConstants {
 
     public boolean isKingThreatened(boolean whiteKing) {
         Chessboard test = new Chessboard(!whiteKing, this);
+        System.out.println("--------------------------");
         List<Move> possibleMoves = test.getLegalMoves(false);
         for (Move m : possibleMoves) {
+            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
             System.out.println(m.materialValueAfterMove);
             if (m.materialValueAfterMove>90000)
             {
@@ -158,7 +164,15 @@ public class Chessboard implements ChessConstants {
         return false;
     }
 
-    public List<Move> getLegalMoves(boolean takeCheckIntoAccount) {
+    public boolean isBlackKingThreatened() {
+        return isKingThreatened(false);
+    }
+
+    public boolean isWhiteKingThreatened() {
+        return isKingThreatened(true);
+    }
+
+        public List<Move> getLegalMoves(boolean takeCheckIntoAccount) {
         int currentMaterialValue = evalMaterialPositionFromWhitePointOfView();
         List<Move> moves = new ArrayList<>();
         for (int fromRow = 0; fromRow < 8; fromRow++)
