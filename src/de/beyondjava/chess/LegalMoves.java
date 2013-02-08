@@ -56,14 +56,11 @@ public class LegalMoves extends MaterialValueEvaluator {
         for (Move m : possibleMoves) {
 //            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
 //            System.out.println(m.materialValueAfterMove);
-            if (m.materialValueAfterMove>90000)
-            {
-                return true;
-            }
-            if (m.materialValueAfterMove<-90000)
-            {
-                return true;
-            }
+            boolean check=false;
+            int capturedPiece = board[m.toRow][m.toColumn];
+            check |= (capturedPiece==s_koenig && activePlayerIsWhite);
+            check |= (capturedPiece==w_koenig && (!activePlayerIsWhite));
+            if (check) return true;
         }
         return false;
     }
@@ -89,8 +86,11 @@ public class LegalMoves extends MaterialValueEvaluator {
                         int valueAfterMove = currentMaterialValue;
                         if (capturedPiece>=2)
                             valueAfterMove -= materialValue[capturedPiece];
+                        boolean check=false;
+                        check |= (capturedPiece==s_koenig && activePlayerIsWhite);
+                        check |= (capturedPiece==w_koenig && (!activePlayerIsWhite));
                         if (!activePlayerIsWhite) valueAfterMove = -valueAfterMove;
-                        Move m = new Move(fromRow, fromColumn, t.row, t.column, valueAfterMove);
+                        Move m = new Move(fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece>=2);
                         moves.add(m);
                     }
                 }

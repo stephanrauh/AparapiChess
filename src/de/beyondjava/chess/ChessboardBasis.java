@@ -69,6 +69,9 @@ public class ChessboardBasis implements ChessConstants {
     public Chessboard moveChessPiece(int fromRow, int fromColumn, int toRow, int toColumn) {
         return new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
     }
+    public Chessboard moveChessPiece(Move move) {
+        return new Chessboard(this, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
+    }
 
 
     private boolean isWhitePiece(int piece) {

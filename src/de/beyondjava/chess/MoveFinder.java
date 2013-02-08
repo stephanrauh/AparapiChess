@@ -1,5 +1,6 @@
 package de.beyondjava.chess;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class MoveFinder extends LegalMoves {
+public class MoveFinder extends PositionalValueEvaluator {
     public MoveFinder() {
         super();
     }
@@ -28,20 +29,22 @@ public class MoveFinder extends LegalMoves {
     }
 
     public Chessboard findOpponentsMove() {
-        Move bestMove = null;
-
         List<Move> possibleMoves = getLegalMoves(true);
         for (Move m : possibleMoves) {
-            if (bestMove == null) bestMove = m;
-            else {
-                if (m.materialValueAfterMove > bestMove.materialValueAfterMove)
-                    bestMove = m;
-            }
+            Chessboard b = moveChessPiece(m);
+            m.positionalValue = b.evalPositionalValue();
         }
-        if (null != bestMove)
+        Collections.sort(possibleMoves);
+        for (Move m: possibleMoves)
         {
+            System.out.println(m.getNotation() + " M:" + m.materialValueAfterMove + " P: " + m.positionalValue + "Sum: " + (m.materialValueAfterMove+m.positionalValue));
+        }
+        if (possibleMoves.size()>0)
+        {
+            Move bestMove = possibleMoves.get(possibleMoves.size()-1);
             return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
         }
+        System.out.println("Matt oder Patt");
         return (Chessboard) this;
     }
 }

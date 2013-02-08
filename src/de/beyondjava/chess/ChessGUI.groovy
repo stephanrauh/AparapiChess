@@ -5,8 +5,8 @@ import javafx.scene.paint.Color
 
 import static groovyx.javafx.GroovyFX.start
 
-def rowNames = ['1', '2', '3', '4', '5', '6', '7', '8']
-def columnNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+def rowNames =    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+def columnNames = ['1', '2', '3', '4', '5', '6', '7', '8']
 
 ChessImages images=new ChessImages()
 Chessboard brett = new Chessboard()
