@@ -74,14 +74,14 @@ public class ChessboardBasis implements ChessConstants {
     }
 
 
-    private boolean isWhitePiece(int piece) {
+    protected boolean isWhitePiece(int piece) {
         if (piece < 2) {
             return false;
         }
         return (((piece / 2) % 2) == 0);
     }
 
-    private boolean isBlackPiece(int piece) {
+    protected boolean isBlackPiece(int piece) {
         if (piece < 2) {
             return false;
         }

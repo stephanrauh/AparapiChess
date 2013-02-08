@@ -47,4 +47,25 @@ public class MoveFinder extends PositionalValueEvaluator {
         System.out.println("Matt oder Patt");
         return (Chessboard) this;
     }
+
+    public Chessboard findOpponentsMove(int foresight) {
+        List<Move> possibleMoves = getLegalMoves(true);
+        for (Move m : possibleMoves) {
+            Chessboard b = moveChessPiece(m);
+            m.positionalValue = b.evalPositionalValue();
+        }
+        Collections.sort(possibleMoves);
+        for (Move m: possibleMoves)
+        {
+            System.out.println(m.getNotation() + " M:" + m.materialValueAfterMove + " P: " + m.positionalValue + "Sum: " + (m.materialValueAfterMove+m.positionalValue));
+        }
+        if (possibleMoves.size()>0)
+        {
+            Move bestMove = possibleMoves.get(possibleMoves.size()-1);
+            return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
+        }
+        System.out.println("Matt oder Patt");
+        return (Chessboard) this;
+    }
+
 }
