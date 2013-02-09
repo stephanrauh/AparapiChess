@@ -36,4 +36,12 @@ public class Move implements Comparable<Move> {
         String s = capture ? "x" : "-";
         return columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow];
     }
+
+    public String toString()
+    {
+        String m = String.format("%5d", materialValueAfterMove);
+        String p = String.format("%5d", positionalValue);
+        String s = String.format("%5d", materialValueAfterMove+positionalValue);
+        return getNotation() + " Value: M: " + m + " P: " + p + " Sum: " + s;
+    }
 }

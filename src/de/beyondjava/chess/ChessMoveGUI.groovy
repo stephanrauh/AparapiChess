@@ -53,7 +53,7 @@ class ChessMoveGUI {
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
             redraw(fields, brett, images)
-            brett=brett.findOpponentsMove();
+            brett=brett.findBestMove();
             redraw(fields, brett, images)
         } else {
             println "Sorry, that's an illegal move"

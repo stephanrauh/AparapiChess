@@ -143,6 +143,8 @@ public class LegalMoves extends MaterialValueEvaluator {
         int nr;
         int nc;
         int direction = activePlayerIsWhite ? -1 : 1;
+
+        // simple move forward
         nr = row + direction;
         nc = column;
         if (nr<0 || nr>=8)
@@ -151,6 +153,7 @@ public class LegalMoves extends MaterialValueEvaluator {
         }
         if ( isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
             result.add(new Position(nr, nc));
+            // double move forward
             if ((row == 6 && activePlayerIsWhite) || (row == 1 && (!activePlayerIsWhite))) {
                 // first move
                 nr = row + 2 * direction;
@@ -160,11 +163,8 @@ public class LegalMoves extends MaterialValueEvaluator {
                 }
             }
         }
-        nr = row + direction;
-        nc = column - 1;
-        if (isOpponentsPiece(nr, nc)) {
-            result.add(new Position(nr, nc));
-        }
+
+        // capture piece at left hand side
         nr = row + direction;
         nc = column - 1;
         if (isOpponentsPiece(nr, nc)) {
@@ -172,6 +172,8 @@ public class LegalMoves extends MaterialValueEvaluator {
         } else if (canBeCapturedEnPassant(nr, nc)) {
             result.add(new Position(nr, nc));
         }
+
+        // capture piece at right hand side
         nr = row + direction;
         nc = column + 1;
         if (isOpponentsPiece(nr, nc)) {

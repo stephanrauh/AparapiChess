@@ -29,19 +29,28 @@ public class MoveFinder extends PositionalValueEvaluator {
         super(oldBoard, fromRow, fromColumn, toRow, toColumn);
     }
 
-    public Chessboard findOpponentsMove() {
-        List<Move> possibleMoves = findBestMoves(4,5);
+    public Chessboard findBestMove() {
+        Move bestMove = findBestMove(1);
+        if (null != bestMove) {
+            return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
+        } else {
+            return (Chessboard) this;
+        }
+    }
+
+    public Move findBestMove(int lookahead) {
+        List<Move> possibleMoves = findBestMoves(lookahead, 5);
 
         if (null != possibleMoves && possibleMoves.size() > 0) {
-            Move bestMove = possibleMoves.get(possibleMoves.size() - 1);
-            return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
+            Move bestMove = possibleMoves.get(0);
+            return bestMove;
         }
         if (isKingThreatened(!activePlayerIsWhite)) {
             System.out.println("Checkmate!");
         } else
             System.out.println("Stalemate!");
 
-        return (Chessboard) this;
+        return null;
     }
 
     public List<Move> findBestMoves(int lookAhead, int count) {
@@ -50,33 +59,24 @@ public class MoveFinder extends PositionalValueEvaluator {
             return myBestMoves;
         }
         for (Move m : myBestMoves) {
-            Move mostInterestingMove = null; // only for debugging purposes
             Chessboard b = moveChessPiece(m);
-            List<Move> opponentsBestMoves = b.findBestMoves(lookAhead - 1, count);
-            int material = -10000000;
-            int positional = -10000000;
-            for (Move o : opponentsBestMoves) {
-                if (material + positional < o.materialValueAfterMove + o.positionalValue) {
-                    mostInterestingMove = o;
-                    material = o.materialValueAfterMove;
-                    positional = o.positionalValue;
-                }
-            }
-            m.materialValueAfterMove = -material;
-            m.positionalValue = -positional;
-            m.opponentInCheck = false; // we aren't interested in this information
+            Move opponentsBestMove = b.findBestMove(lookAhead - 1);
+            b = moveChessPiece(opponentsBestMove)         ;
+            int mat = b.evalMaterialPosition();
+            int pos = b.evalPositionalValue();
+            m.materialValueAfterMove=mat;
+            m.positionalValue=pos;
         }
         Collections.sort(myBestMoves);
         List<Move> interestingMoves = new ArrayList<>();
-        for (int i = myBestMoves.size() - 1; i >= myBestMoves.size() - count; i--) {
+        for (int i = 0; i < count && i < myBestMoves.size(); i++) {
             if (i >= 0) {
                 interestingMoves.add(myBestMoves.get(i));
                 String leer = "";
-                for (int k=lookAhead; k < 6; k++)
-                {
-                    leer +="  ";
+                for (int k = lookAhead; k < 6; k++) {
+                    leer += "  ";
                 }
-                System.out.println(leer + "findBestMoves(" + lookAhead + ", " + count + ") = "+myBestMoves.get(i).getNotation());
+                System.out.println(leer + "findBestMoves(" + lookAhead + ", " + count + ") = " + myBestMoves.get(i));
             }
         }
         return interestingMoves;
@@ -86,7 +86,9 @@ public class MoveFinder extends PositionalValueEvaluator {
         List<Move> possibleMoves = getLegalMoves(true);
         for (Move m : possibleMoves) {
             Chessboard b = moveChessPiece(m);
-            m.positionalValue = b.evalPositionalValue();
+            int pos = b.evalPositionalValueFromWhitePointOfView();
+            if (!activePlayerIsWhite) pos = -pos;
+            m.positionalValue = pos;
         }
         Collections.sort(possibleMoves);
 //        for (Move m : possibleMoves) {

@@ -8,10 +8,10 @@ import static groovyx.javafx.GroovyFX.start
 def rowNames =    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 def columnNames = ['1', '2', '3', '4', '5', '6', '7', '8']
 
-ChessImages images=new ChessImages()
-Chessboard brett = new Chessboard()
-ImageView[][] fields = new ImageView[8][8];
-ChessGUIState state = new ChessGUIState();
+ChessImages images=ChessGUIRemoteControl.images
+Chessboard chessboard =ChessGUIRemoteControl.chessboard
+ImageView[][] fields = ChessGUIRemoteControl.fields
+ChessGUIState state = ChessGUIRemoteControl.state
 
 
 start {
@@ -24,7 +24,7 @@ start {
                 8.times { int column ->
                     8.times { int row ->
                         fields[row][column] = imageView(x: 60 + 90 * column, y: 60 + 90 * row,
-                                              onMouseClicked: {brett=ChessMoveGUI.onClick(row, column, fields, brett, state, images)})
+                                              onMouseClicked: {chessboard=ChessMoveGUI.onClick(row, column, fields, chessboard, state, images)})
                     }
                 }
                 8.times {
@@ -60,5 +60,6 @@ start {
             fill linearGradient(endX: 0, stops: [WHITE, WHITE])
         }
     }
-    ChessMoveGUI.redraw(fields, brett, images)
+    ChessMoveGUI.redraw(fields, chessboard, images)
+    ChessGUIRemoteControl.update()
 }

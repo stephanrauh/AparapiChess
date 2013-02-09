@@ -68,9 +68,9 @@ public class PositionalValueEvaluator extends LegalMoves {
                 value += 100;
             }
             else {
-                int mv = currentMaterial - m.materialValueAfterMove;
-                if (mv != 0) {
-                    value += mv / 50;
+                int mvGain = m.materialValueAfterMove- currentMaterial;
+                if (mvGain != 0) {
+                    value += mvGain / 10;
                 }
             }
             value += 20;
