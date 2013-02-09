@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class MoveGenerator extends PositionalValueEvaluator {
 
-    public static final Move CHECKMATEMOVE = new Move(0, 0, 0, 0, -1000000, false, false);
-    public static final Move STALEMATEMOVE = new Move(0, 0, 0, 0, 0, false, false);
+    public static final Move CHECKMATEMOVE = new Move(0,0, 0, 0, 0, -1000000, false, false,0);
+    public static final Move STALEMATEMOVE = new Move(0,0, 0, 0, 0, 0, false, false,0);
     public static final ArrayList<Move> CHECKMATEMOVELIST = new ArrayList<Move>() {{
         add(CHECKMATEMOVE);
     }};
@@ -42,7 +42,7 @@ public class MoveGenerator extends PositionalValueEvaluator {
 
     public Chessboard findBestMove() {
         long start = System.nanoTime();
-        Move bestMove = findBestMove(4);
+        Move bestMove = findBestMove(2);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
         if (bestMove == STALEMATEMOVE) {
@@ -108,8 +108,7 @@ public class MoveGenerator extends PositionalValueEvaluator {
         List<Move> possibleMoves = getLegalMoves(true);
         for (Move m : possibleMoves) {
             Chessboard b = moveChessPiece(m);
-            Chessboard bb = new Chessboard(activePlayerIsWhite, b);
-            int pos = bb.evalPositionalValue();
+            int pos = -b.evalPositionalValue();
  //           if (m.fromColumn == 4 || m.fromColumn == 3)            // DEBUG
 //                if (m.toRow == 3) // DEBUG
 //                   pos = bb.evalPositionalValue(); // DEBUG
