@@ -11,6 +11,10 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class LegalMoves extends MaterialValueEvaluator {
+
+    private boolean checkmate = false;
+    private boolean stalemate = false;
+
     public LegalMoves() {
         super();
     }
@@ -19,14 +23,28 @@ public class LegalMoves extends MaterialValueEvaluator {
         super(activePlayerIsWhite, board);
     }
 
-    public LegalMoves(boolean activePlayerIsWhite, Piece... pieces)
-    {
+    public LegalMoves(boolean activePlayerIsWhite, Piece... pieces) {
         super(activePlayerIsWhite, pieces);
     }
 
-
     public LegalMoves(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
         super(oldBoard, fromRow, fromColumn, toRow, toColumn);
+    }
+
+    public boolean isCheckmate() {
+        return checkmate;
+    }
+
+    public void setCheckmate(boolean checkmate) {
+        this.checkmate = checkmate;
+    }
+
+    public boolean isStalemate() {
+        return stalemate;
+    }
+
+    public void setStalemate(boolean stalemate) {
+        this.stalemate = stalemate;
     }
 
     public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {
@@ -49,6 +67,7 @@ public class LegalMoves extends MaterialValueEvaluator {
         }
         return false;
     }
+
     public boolean isKingThreatened(boolean whiteKing) {
         Chessboard test = new Chessboard(!whiteKing, this);
 //        System.out.println("--------------------------");
@@ -56,10 +75,10 @@ public class LegalMoves extends MaterialValueEvaluator {
         for (Move m : possibleMoves) {
 //            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
 //            System.out.println(m.materialValueAfterMove);
-            boolean check=false;
+            boolean check = false;
             int capturedPiece = board[m.toRow][m.toColumn];
-            check |= (capturedPiece==s_koenig && activePlayerIsWhite);
-            check |= (capturedPiece==w_koenig && (!activePlayerIsWhite));
+            check |= (capturedPiece == s_koenig && activePlayerIsWhite);
+            check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
             if (check) return true;
         }
         return false;
@@ -80,24 +99,23 @@ public class LegalMoves extends MaterialValueEvaluator {
             for (int fromColumn = 0; fromColumn < 8; fromColumn++) {
                 if (board[fromRow][fromColumn] >= 2) {
 
-                    List<Position> targets = takeCheckIntoAccount?getLegalMovesForAPiece(fromRow, fromColumn):getLegalMovesForAPieceIgnoringCheck(fromRow, fromColumn);
+                    List<Position> targets = takeCheckIntoAccount ? getLegalMovesForAPiece(fromRow, fromColumn) : getLegalMovesForAPieceIgnoringCheck(fromRow, fromColumn);
                     for (Position t : targets) {
                         int capturedPiece = board[t.row][t.column];
                         int valueAfterMove = currentMaterialValue;
-                        if (capturedPiece>=2)
+                        if (capturedPiece >= 2)
                             valueAfterMove -= materialValue[capturedPiece];
-                        boolean check=false;
-                        check |= (capturedPiece==s_koenig && activePlayerIsWhite);
-                        check |= (capturedPiece==w_koenig && (!activePlayerIsWhite));
+                        boolean check = false;
+                        check |= (capturedPiece == s_koenig && activePlayerIsWhite);
+                        check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
                         if (!activePlayerIsWhite) valueAfterMove = -valueAfterMove;
-                        Move m = new Move(fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece>=2);
+                        Move m = new Move(fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece >= 2);
                         moves.add(m);
                     }
                 }
             }
         return moves;
     }
-
 
     public List<Position> getLegalMovesForAPiece(int row, int column) {
         List<Position> result = getLegalMovesForAPieceIgnoringCheck(row, column);
@@ -147,11 +165,10 @@ public class LegalMoves extends MaterialValueEvaluator {
         // simple move forward
         nr = row + direction;
         nc = column;
-        if (nr<0 || nr>=8)
-        {
+        if (nr < 0 || nr >= 8) {
             return result;
         }
-        if ( isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
+        if (isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
             result.add(new Position(nr, nc));
             // double move forward
             if ((row == 6 && activePlayerIsWhite) || (row == 1 && (!activePlayerIsWhite))) {

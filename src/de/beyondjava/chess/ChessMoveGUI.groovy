@@ -30,7 +30,6 @@ class ChessMoveGUI {
     }
 
     public static Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
-        println "Hallo $row $column";
         int piece = brett.getChessPiece(row, column)
 
         if (guiState.currentlyTouchedPieceX < 0 && guiState.currentlyTouchedPieceY < 0 && piece > 1) {
@@ -48,7 +47,6 @@ class ChessMoveGUI {
     public static Chessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard brett, ChessGUIState guiState, ChessImages images) {
         if (brett.isMovePossible(fromRow, fromColumn, toRow, toColumn)) {
             fields[fromRow][fromColumn].opacity = 1.0
-            println "Move"
             brett = brett.moveChessPiece(fromRow, fromColumn, toRow, toColumn)
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
@@ -69,6 +67,14 @@ class ChessMoveGUI {
                                 fields[row][column].setImage(images.getImage(brett.getChessPiece(row, column), row, column))
                             }
                 }
+        if (brett.isStalemate())
+        {
+
+        }
+        else if (brett.isCheckmate())
+        {
+
+        }
     }
 
 }

@@ -11,26 +11,47 @@ import java.util.List;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class MoveFinder extends PositionalValueEvaluator {
-    public MoveFinder() {
+public class MoveGenerator extends PositionalValueEvaluator {
+
+    public static final Move CHECKMATEMOVE = new Move(0, 0, 0, 0, -1000000, false, false);
+    public static final Move STALEMATEMOVE = new Move(0, 0, 0, 0, 0, false, false);
+    public static final ArrayList<Move> CHECKMATEMOVELIST = new ArrayList<Move>() {{
+        add(CHECKMATEMOVE);
+    }};
+    public static final ArrayList<Move> STALEMATEMOVELIST = new ArrayList<Move>() {{
+        add(STALEMATEMOVE);
+    }};
+
+
+    public MoveGenerator() {
         super();
     }
 
-    public MoveFinder(boolean activePlayerIsWhite, ChessboardBasis board) {
+    public MoveGenerator(boolean activePlayerIsWhite, ChessboardBasis board) {
         super(activePlayerIsWhite, board);
     }
 
-    public MoveFinder(boolean activePlayerIsWhite, Piece... pieces) {
+    public MoveGenerator(boolean activePlayerIsWhite, Piece... pieces) {
         super(activePlayerIsWhite, pieces);
     }
 
 
-    public MoveFinder(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
+    public MoveGenerator(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
         super(oldBoard, fromRow, fromColumn, toRow, toColumn);
     }
 
     public Chessboard findBestMove() {
-        Move bestMove = findBestMove(1);
+        long start = System.nanoTime();
+        Move bestMove = findBestMove(6);
+        long dauer = System.nanoTime()-start;
+        System.out.println("Calculation took " + ((dauer/1000)/1000.0d) + "ms");
+        if (bestMove == STALEMATEMOVE) {
+            setStalemate(true);
+            return (Chessboard) this;
+        } else if (bestMove == CHECKMATEMOVE) {
+            setCheckmate(true);
+            return (Chessboard) this;
+        }
         if (null != bestMove) {
             return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
         } else {
@@ -39,17 +60,15 @@ public class MoveFinder extends PositionalValueEvaluator {
     }
 
     public Move findBestMove(int lookahead) {
-        List<Move> possibleMoves = findBestMoves(lookahead, 5);
+        List<Move> possibleMoves = findBestMoves(lookahead, 3);
+        if (possibleMoves == STALEMATEMOVELIST) return STALEMATEMOVE;
+        if (possibleMoves == CHECKMATEMOVELIST) return CHECKMATEMOVE;
 
-        if (null != possibleMoves && possibleMoves.size() > 0) {
+        if (possibleMoves.size() > 0) {
             Move bestMove = possibleMoves.get(0);
             return bestMove;
         }
-        if (isKingThreatened(!activePlayerIsWhite)) {
-            System.out.println("Checkmate!");
-        } else
-            System.out.println("Stalemate!");
-
+        System.out.println("This line shouldn't be reached! (MoveGenerator.findBestMove)");
         return null;
     }
 
@@ -58,14 +77,17 @@ public class MoveFinder extends PositionalValueEvaluator {
         if (lookAhead <= 1) {
             return myBestMoves;
         }
+        if (myBestMoves == STALEMATEMOVELIST || myBestMoves == CHECKMATEMOVELIST) {
+            return myBestMoves;
+        }
         for (Move m : myBestMoves) {
             Chessboard b = moveChessPiece(m);
             Move opponentsBestMove = b.findBestMove(lookAhead - 1);
-            b = moveChessPiece(opponentsBestMove)         ;
+            b = moveChessPiece(opponentsBestMove);
             int mat = b.evalMaterialPosition();
             int pos = b.evalPositionalValue();
-            m.materialValueAfterMove=mat;
-            m.positionalValue=pos;
+            m.materialValueAfterMove = -mat;
+            m.positionalValue = -pos;
         }
         Collections.sort(myBestMoves);
         List<Move> interestingMoves = new ArrayList<>();
@@ -104,11 +126,11 @@ public class MoveFinder extends PositionalValueEvaluator {
             return interestingMoves;
         }
         if (isKingThreatened(!activePlayerIsWhite)) {
-            System.out.println("Checkmate!");
-        } else
-            System.out.println("Stalemate!");
 
-        return null;
+            return CHECKMATEMOVELIST;
+        } else {
+            return STALEMATEMOVELIST;
+        }
     }
 
 

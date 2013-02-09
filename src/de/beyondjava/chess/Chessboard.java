@@ -5,7 +5,7 @@ package de.beyondjava.chess;
  * Date: 02.02.13
  * Time: 19:17
  */
-public class Chessboard extends MoveFinder {
+public class Chessboard extends MoveGenerator {
 
     public Chessboard() {
         super();

@@ -5,8 +5,8 @@ import javafx.scene.paint.Color
 
 import static groovyx.javafx.GroovyFX.start
 
-def rowNames =    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-def columnNames = ['1', '2', '3', '4', '5', '6', '7', '8']
+def columnNames =    ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+def rowNames = ['8', '7', '6', '5', '4', '3', '2', '1']
 
 ChessImages images=ChessGUIRemoteControl.images
 Chessboard chessboard =ChessGUIRemoteControl.chessboard
@@ -30,22 +30,22 @@ start {
                 8.times {
                     text(
                             layoutX: 60 + 45 + 90 * it,
-                            layoutY: 50, text: rowNames[it], font: '30pt sanserif') {
+                            layoutY: 50, text: columnNames[it], font: '30pt sanserif') {
                         fill linearGradient(endX: 0, stops: [BLACK, BROWN])
                     }
                     text(
                             layoutX: 60 + 45 + 90 * it,
-                            layoutY: 810, text: rowNames[it], font: '30pt sanserif') {
+                            layoutY: 810, text: columnNames[it], font: '30pt sanserif') {
                         fill linearGradient(endX: 0, stops: [BLACK, BROWN])
                     }
                     text(
                             layoutX: 30,
-                            layoutY: 120 + 90 * it, text: columnNames[it], font: '30pt sanserif') {
+                            layoutY: 120 + 90 * it, text: rowNames[it], font: '30pt sanserif') {
                         fill linearGradient(endX: 0, stops: [BLACK, BROWN])
                     }
                     text(
                             layoutX: 790,
-                            layoutY: 120 + 90 * it, text: columnNames[it], font: '30pt sanserif') {
+                            layoutY: 120 + 90 * it, text: rowNames[it], font: '30pt sanserif') {
                         fill linearGradient(endX: 0, stops: [BLACK, BROWN])
                     }
                 }
