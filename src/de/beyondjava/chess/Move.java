@@ -26,9 +26,9 @@ public class Move implements Comparable<Move> {
     @Override
     public int compareTo(Move o) {
         if (null == o) return -1;
-        int m = materialValueAfterMove - o.materialValueAfterMove;
-        int p = positionalValue - o.positionalValue;
-        return m + p;
+        int m = o.materialValueAfterMove - materialValueAfterMove;
+        int p = o.positionalValue - positionalValue;
+        return -(m + p);
     }
 
     public String getNotation() {

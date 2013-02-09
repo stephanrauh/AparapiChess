@@ -51,31 +51,42 @@ public class PositionalValueEvaluator extends LegalMoves {
     }
 
     public int evalPositionalValue() {
-        int value = evalPositionalValueFromWhitePointOfView();
-        if (!activePlayerIsWhite) return -value;
-        else return value;
+        if (true) {
+            return evalFieldPositionalValue();
+        } else {
+            int currentMaterial = evalMaterialPosition();
+            int fieldPosition = evalFieldPositionalValue();
+            // which moves are possible if the player could move again?
+            int value = evalValueOfLegalMoves(currentMaterial);
+            Chessboard opponent = new Chessboard(!activePlayerIsWhite, this);
+            int opponentValue = opponent.evalValueOfLegalMoves(-currentMaterial);
+            value = value - opponentValue;
+            return value + fieldPosition;
+        }
     }
 
-    public int evalPositionalValueFromWhitePointOfView() {
-        int currentMaterial = evalMaterialPosition();
-        int fieldPosition = evalFieldPositionalValueFromWhitePointOfView();
-        if (!activePlayerIsWhite) fieldPosition = -fieldPosition;
+    public int evalValueOfLegalMoves(int currentMaterial) {
         int value = 0;
-        // which moves are possible if the player could move again?
         List<Move> moves = getLegalMoves(true);
         for (Move m : moves) {
             if (m.opponentInCheck) {
                 value += 100;
-            }
-            else {
-                int mvGain = m.materialValueAfterMove- currentMaterial;
+            } else {
+                int mvGain = m.materialValueAfterMove - currentMaterial;
                 if (mvGain != 0) {
+                    if (mvGain < 0) {
+                        System.out.println("Häh?");
+                    }
                     value += mvGain / 10;
                 }
             }
             value += 20;
         }
-        return value+fieldPosition;
+        return value;
+    }
+
+    private int evalFieldPositionalValue() {
+        return activePlayerIsWhite ? evalFieldPositionalValueFromWhitePointOfView() : -evalFieldPositionalValueFromWhitePointOfView();
     }
 
     private int evalFieldPositionalValueFromWhitePointOfView() {

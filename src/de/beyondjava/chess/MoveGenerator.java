@@ -42,9 +42,9 @@ public class MoveGenerator extends PositionalValueEvaluator {
 
     public Chessboard findBestMove() {
         long start = System.nanoTime();
-        Move bestMove = findBestMove(6);
-        long dauer = System.nanoTime()-start;
-        System.out.println("Calculation took " + ((dauer/1000)/1000.0d) + "ms");
+        Move bestMove = findBestMove(4);
+        long dauer = System.nanoTime() - start;
+        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
         if (bestMove == STALEMATEMOVE) {
             setStalemate(true);
             return (Chessboard) this;
@@ -60,7 +60,7 @@ public class MoveGenerator extends PositionalValueEvaluator {
     }
 
     public Move findBestMove(int lookahead) {
-        List<Move> possibleMoves = findBestMoves(lookahead, 3);
+        List<Move> possibleMoves = findBestMoves(lookahead, 5);
         if (possibleMoves == STALEMATEMOVELIST) return STALEMATEMOVE;
         if (possibleMoves == CHECKMATEMOVELIST) return CHECKMATEMOVE;
 
@@ -108,19 +108,25 @@ public class MoveGenerator extends PositionalValueEvaluator {
         List<Move> possibleMoves = getLegalMoves(true);
         for (Move m : possibleMoves) {
             Chessboard b = moveChessPiece(m);
-            int pos = b.evalPositionalValueFromWhitePointOfView();
-            if (!activePlayerIsWhite) pos = -pos;
+            Chessboard bb = new Chessboard(activePlayerIsWhite, b);
+            int pos = bb.evalPositionalValue();
+ //           if (m.fromColumn == 4 || m.fromColumn == 3)            // DEBUG
+//                if (m.toRow == 3) // DEBUG
+//                   pos = bb.evalPositionalValue(); // DEBUG
+
             m.positionalValue = pos;
         }
         Collections.sort(possibleMoves);
 //        for (Move m : possibleMoves) {
-//            System.out.println(m.getNotation() + " M:" + m.materialValueAfterMove + " P: " + m.positionalValue + "Sum: " + (m.materialValueAfterMove + m.positionalValue));
+//            System.out.println(m);
 //        }
         if (possibleMoves.size() > 0) {
             List<Move> interestingMoves = new ArrayList<>();
             for (int i = possibleMoves.size() - 1; i >= possibleMoves.size() - count; i--) {
                 if (i >= 0)
-                    interestingMoves.add(possibleMoves.get(i));
+//                    if (activePlayerIsWhite || possibleMoves.get(i).fromColumn == 4 || possibleMoves.get(i).fromColumn == 3)            // DEBUG
+//                        if (activePlayerIsWhite || possibleMoves.get(i).toRow == 3) // DEBUG
+                            interestingMoves.add(possibleMoves.get(i));
             }
 
             return interestingMoves;
