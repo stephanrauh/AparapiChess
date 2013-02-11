@@ -107,11 +107,10 @@ public class LegalMoves extends MaterialValueEvaluator {
                         int capturedPiece = board[t.row][t.column];
                         int valueAfterMove = currentMaterialValue;
                         if (capturedPiece >= 2)
-                            valueAfterMove -= s_MATERIAL_VALUE[capturedPiece];
+                            valueAfterMove += s_MATERIAL_VALUE[capturedPiece];
                         boolean check = false;
                         check |= (capturedPiece == s_koenig && activePlayerIsWhite);
                         check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
-                        if (!activePlayerIsWhite) valueAfterMove = -valueAfterMove;
                         Move m = new Move(getChessPiece(fromRow, fromColumn), fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece >= 2, capturedPiece);
                         moves.add(m);
                     }

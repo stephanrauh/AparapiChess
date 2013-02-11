@@ -7,14 +7,16 @@ import de.beyondjava.chess.common.Move;
  * Collection of chess boards, using as primitive data types as possible.
  */
 public class PrimitiveChessBoards implements ChessConstants {
-    public static final int s_MAX_BOARDS = 2500;
+    public static final int s_MAX_BOARDS = 30000;
     public static final boolean s_WHITE = true;
     public static final boolean s_BLACK = false;
     int[][][] chessboards = new int[s_MAX_BOARDS][][];
-    boolean[] activePlayerisWhite = new boolean[s_MAX_BOARDS];
+    boolean[] activePlayerIsWhite = new boolean[s_MAX_BOARDS];
     int count = 0;
     int[] materialValueFromActivePlayersPointOfView = new int[s_MAX_BOARDS];
     int[] currentMaterialLossFromActivePlayersPointOfView = new int[s_MAX_BOARDS];
+    int[] positionalValueFromActivePlayersPointOfView = new int[s_MAX_BOARDS];
+    int[] moveValueFromActivePlayersPointOfView = new int[s_MAX_BOARDS];
 
     public int getMaterialValueFromActivePlayersPointOfView(int board) {
         return materialValueFromActivePlayersPointOfView[board];
@@ -29,11 +31,11 @@ public class PrimitiveChessBoards implements ChessConstants {
     }
 
     public boolean activePlayerIsWhite(int board) {
-        return activePlayerisWhite[board];
+        return activePlayerIsWhite[board];
     }
 
     public boolean activePlayerIsBlack(int board) {
-        return !activePlayerisWhite[board];
+        return !activePlayerIsWhite[board];
     }
 
     /**
@@ -42,7 +44,7 @@ public class PrimitiveChessBoards implements ChessConstants {
     public int moveChessPiece(int board, int fromRow, int fromColumn, int toRow, int toColumn) {
         int materialGain = 0;
         int[][] newBoard = new int[8][8];
-        for (int row = 2; row < 8; row += 3) {
+        for (int row = 0; row < 8; row += 1) {
             newBoard[row] = new int[8];
             for (int col = 0; col < 8; col++) {
                 int piece = getChessPiece(board, row, col);
@@ -75,7 +77,10 @@ public class PrimitiveChessBoards implements ChessConstants {
     }
 
     public int moveChessPiece(int board, Move move) {
-        return moveChessPiece(board, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
+        int b = moveChessPiece(board, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
+        materialValueFromActivePlayersPointOfView[b] = -move.materialValueAfterMove;
+        System.out.println(move + " yield board " + b);
+        return b;
     }
 
     /**
@@ -84,7 +89,7 @@ public class PrimitiveChessBoards implements ChessConstants {
     public int addChessboard(boolean activePlayerIsWhite, int[][] newboard, int materialValue, int materialLoss) {
         synchronized (this) {
             chessboards[count] = newboard;
-            activePlayerisWhite[count] = activePlayerIsWhite;
+            this.activePlayerIsWhite[count] = activePlayerIsWhite;
             materialValueFromActivePlayersPointOfView[count] = materialValue;
             currentMaterialLossFromActivePlayersPointOfView[count] = materialLoss;
             count++;
@@ -129,7 +134,7 @@ public class PrimitiveChessBoards implements ChessConstants {
         return false;
     }
 
-    protected boolean isOpponentsPiece(int board, int row, int column) {
+    private boolean isOpponentsPiece(int board, int row, int column) {
         if (!isInsideBoard(board, row, column)) return false;
         if (getChessPiece(board, row, column) <= 0) return false;
         if (activePlayerIsWhite(board)) {
@@ -139,7 +144,29 @@ public class PrimitiveChessBoards implements ChessConstants {
         }
     }
 
-    protected boolean isEmptyOrCanBeCaptured(int board, int row, int column) {
+    protected boolean isOpponentsPiece(int board, int row, int column, boolean activePlayerIsWhite) {
+        if (!isInsideBoard(board, row, column)) return false;
+        if (getChessPiece(board, row, column) <= 0) return false;
+        if (activePlayerIsWhite) {
+            return (isBlackPiece(getChessPiece(board, row, column)));
+        } else {
+            return (isWhitePiece(getChessPiece(board, row, column)));
+        }
+    }
+
+    protected boolean isEmptyOrCanBeCaptured(int board, int row, int column, boolean activePlayerIsWhite) {
+        if (!isInsideBoard(board, row, column)) return false;
+        int piece = getChessPiece(board, row, column);
+        if (piece <= 0) return true;
+        if (activePlayerIsWhite) {
+            return (isBlackPiece(piece));
+        } else {
+            return (isWhitePiece(piece));
+        }
+
+    }
+
+    private boolean isEmptyOrCanBeCaptured(int board, int row, int column) {
         if (!isInsideBoard(board, row, column)) return false;
         int piece = getChessPiece(board, row, column);
         if (piece <= 0) return true;

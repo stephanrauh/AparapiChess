@@ -11,19 +11,21 @@ public class Move implements Comparable<Move> {
     public boolean capture;
     public int piece;
     public int capturedPiece;
+    public int boardAfterMove; // used by PrimitiveMoveGenerator
+    public int moveValue; // value of the board after the move, according to the possible moves
     String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H"};
     String[] rows = {"8", "7", "6", "5", "4", "3", "2", "1"};
-    String[] pieceName={"P" /* en passant */,
+    String[] pieceName = {"P" /* en passant */,
             " ", " ", "P", "P", "P", "P",
-                                  "R", "R", "R", "R",
-                                  "B", "B", "B", "B",
-                                  "N", "N", "N", "N",
-                                  "Q", "Q", "Q", "Q",
-                                  "K", "K", "K", "K"};
+            "R", "R", "R", "R",
+            "N", "N", "N", "N",
+            "B", "B", "B", "B",
+            "Q", "Q", "Q", "Q",
+            "K", "K", "K", "K"};
 
 
     public Move(int piece, int fromRow, int fromColumn, int toRow, int toColumn, int materialValueAfterMove, boolean opponentInCheck, boolean capture, int capturedPiece) {
-        this.piece=piece;
+        this.piece = piece;
         this.fromColumn = fromColumn;
         this.fromRow = fromRow;
         this.toRow = toRow;
@@ -31,7 +33,7 @@ public class Move implements Comparable<Move> {
         this.materialValueAfterMove = materialValueAfterMove;
         this.opponentInCheck = opponentInCheck;
         this.capture = capture;
-        this.capturedPiece=capturedPiece;
+        this.capturedPiece = capturedPiece;
     }
 
     @Override
@@ -45,15 +47,15 @@ public class Move implements Comparable<Move> {
     public String getNotation() {
         String check = opponentInCheck ? "+" : " ";
         String s = capture ? "x" : "-";
-        s += pieceName[capturedPiece+1];
-        return pieceName[piece] + columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow];
+        s += pieceName[capturedPiece + 1];
+        return pieceName[piece + 1] + columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow];
     }
 
-    public String toString()
-    {
+    public String toString() {
         String m = String.format("%5d", materialValueAfterMove);
         String p = String.format("%5d", positionalValue);
-        String s = String.format("%5d", materialValueAfterMove+positionalValue);
-        return getNotation() + " Value: M: " + m + " P: " + p + " Sum: " + s;
+        String mv = String.format("%5d", moveValue);
+        String s = String.format("%5d", materialValueAfterMove + positionalValue + moveValue);
+        return getNotation() + " Value: M: " + m + " P: " + p + " Mv:" + mv + " Sum: " + s;
     }
 }
