@@ -1,4 +1,4 @@
-package de.beyondjava.chess
+package de.beyondjava.chess.gui
 
 /**
  * Created with IntelliJ IDEA.

@@ -1,4 +1,6 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
+
+import de.beyondjava.chess.common.Piece;
 
 /**
  * Represents the chess board and provide a couple of methods on possible moves.

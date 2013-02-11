@@ -1,5 +1,6 @@
-package de.beyondjava.chess
+package de.beyondjava.chess.gui
 
+import de.beyondjava.chess.objectOrientedEngine.Chessboard
 import javafx.scene.image.ImageView
 import javafx.scene.paint.Color
 

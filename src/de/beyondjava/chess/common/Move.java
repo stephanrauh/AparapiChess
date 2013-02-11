@@ -1,16 +1,16 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.common;
 
 public class Move implements Comparable<Move> {
-    int fromColumn;
-    int fromRow;
-    int toColumn;
-    int toRow;
-    int materialValueAfterMove;
-    boolean opponentInCheck;
-    int positionalValue = 0;
-    boolean capture;
-    int piece;
-    int capturedPiece;
+    public int fromColumn;
+    public int fromRow;
+    public int toColumn;
+    public int toRow;
+    public int materialValueAfterMove;
+    public boolean opponentInCheck;
+    public int positionalValue = 0;
+    public boolean capture;
+    public int piece;
+    public int capturedPiece;
     String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H"};
     String[] rows = {"8", "7", "6", "5", "4", "3", "2", "1"};
     String[] pieceName={"P" /* en passant */,

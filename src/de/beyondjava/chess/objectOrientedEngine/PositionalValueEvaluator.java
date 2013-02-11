@@ -1,4 +1,7 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
+
+import de.beyondjava.chess.common.Piece;
+import de.beyondjava.chess.common.Move;
 
 import java.util.List;
 

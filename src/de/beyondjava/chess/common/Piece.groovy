@@ -1,5 +1,4 @@
-package de.beyondjava.chess
-
+package de.beyondjava.chess.common
 /**
  * Created with IntelliJ IDEA.
  * User: SoyYo
@@ -8,9 +7,9 @@ package de.beyondjava.chess
  * To change this template use File | Settings | File Templates.
  */
 class Piece implements ChessConstants {
-    int row;
-    int column;
-    int piece;
+    public int row;
+    public int column;
+    public int piece;
 
     public Piece(String s)
     {
@@ -35,4 +34,7 @@ class Piece implements ChessConstants {
             piece += 2;
         }
     }
-}
+
+    public int getRow ( ) {
+    return row ;
+    }}

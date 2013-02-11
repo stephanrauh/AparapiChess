@@ -1,7 +1,7 @@
 package de.beyondjava.chess.test
 
-import de.beyondjava.chess.Chessboard
-import de.beyondjava.chess.Piece
+import de.beyondjava.chess.objectOrientedEngine.Chessboard
+import de.beyondjava.chess.common.Piece
 
 /**
  * Created with IntelliJ IDEA.

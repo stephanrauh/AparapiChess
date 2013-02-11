@@ -1,4 +1,4 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
 
 /**
  * Created with IntelliJ IDEA.
@@ -8,7 +8,7 @@ package de.beyondjava.chess;
  * To change this template use File | Settings | File Templates.
  */
 public class Position {
-    int row;
+    public int row;
 
     public int getColumn() {
         return column;
@@ -18,7 +18,7 @@ public class Position {
         return row;
     }
 
-    int column;
+    public int column;
 
     public Position(int row, int column)
     {

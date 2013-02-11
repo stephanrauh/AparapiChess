@@ -1,4 +1,8 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
+
+import de.beyondjava.chess.common.Piece;
+import de.beyondjava.chess.common.ChessConstants;
+import de.beyondjava.chess.common.Move;
 
 /**
  * Represents the chess board and provide a couple of methods on possible moves.
@@ -6,8 +10,8 @@ package de.beyondjava.chess;
  * Time: 19:17
  */
 public class ChessboardBasis implements ChessConstants {
-    final int[][] board;
-    final boolean activePlayerIsWhite;
+    public final int[][] board;
+    public final boolean activePlayerIsWhite;
 
     public ChessboardBasis() {
         activePlayerIsWhite = true;
@@ -25,7 +29,7 @@ public class ChessboardBasis implements ChessConstants {
         board = new int[8][8];
         for (Piece p: pieces)
         {
-            board[p.getRow()][p.getColumn()] = p.getPiece();
+            board[p.row][p.column] = p.piece;
         }
     }
 

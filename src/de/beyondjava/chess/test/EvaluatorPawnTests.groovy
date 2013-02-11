@@ -1,6 +1,7 @@
 package de.beyondjava.chess.test
 
-import de.beyondjava.chess.*
+import de.beyondjava.chess.common.Piece
+import de.beyondjava.chess.objectOrientedEngine.Chessboard
 
 /**
  * Tests checking the evaluator methods.

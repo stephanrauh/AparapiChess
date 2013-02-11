@@ -1,4 +1,6 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
+
+import de.beyondjava.chess.common.Piece;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,8 +42,8 @@ public class MaterialValueEvaluator extends ChessboardBasis
             for (int toColumn = 0; toColumn < 8; toColumn++) {
                 int piece = board[fromRow][toColumn];
                 if (piece >= 2) {
-//                    System.out.println(toColumn + "," +fromRow + ": " +piece + "=" + materialValue[piece] );
-                    value += materialValue[piece];
+//                    System.out.println(toColumn + "," +fromRow + ": " +piece + "=" + s_MATERIAL_VALUE[piece] );
+                    value += s_MATERIAL_VALUE[piece];
                 }
             }
         return value;

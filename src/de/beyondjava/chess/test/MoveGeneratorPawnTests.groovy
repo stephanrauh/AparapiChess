@@ -1,8 +1,8 @@
 package de.beyondjava.chess.test
-import de.beyondjava.chess.ChessGUIRemoteControl
-import de.beyondjava.chess.Chessboard
-import de.beyondjava.chess.Move
-import de.beyondjava.chess.Piece
+import de.beyondjava.chess.gui.ChessGUIRemoteControl
+import de.beyondjava.chess.objectOrientedEngine.Chessboard
+import de.beyondjava.chess.common.Move
+import de.beyondjava.chess.common.Piece
 /**
  * Tests checking the evaluator methods.
  */

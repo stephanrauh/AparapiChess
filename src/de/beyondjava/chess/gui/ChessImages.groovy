@@ -1,4 +1,4 @@
-package de.beyondjava.chess
+package de.beyondjava.chess.gui
 
 import javafx.scene.image.Image
 

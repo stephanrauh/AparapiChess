@@ -1,4 +1,7 @@
-package de.beyondjava.chess;
+package de.beyondjava.chess.objectOrientedEngine;
+
+import de.beyondjava.chess.common.Move;
+import de.beyondjava.chess.common.Piece;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +107,7 @@ public class LegalMoves extends MaterialValueEvaluator {
                         int capturedPiece = board[t.row][t.column];
                         int valueAfterMove = currentMaterialValue;
                         if (capturedPiece >= 2)
-                            valueAfterMove -= materialValue[capturedPiece];
+                            valueAfterMove -= s_MATERIAL_VALUE[capturedPiece];
                         boolean check = false;
                         check |= (capturedPiece == s_koenig && activePlayerIsWhite);
                         check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));

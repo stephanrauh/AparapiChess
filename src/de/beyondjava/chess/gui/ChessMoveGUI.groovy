@@ -1,5 +1,7 @@
-package de.beyondjava.chess
+package de.beyondjava.chess.gui
 
+import de.beyondjava.chess.objectOrientedEngine.Chessboard
+import de.beyondjava.chess.primitives.PrimitiveMoveGenerator
 import javafx.scene.image.ImageView
 
 /**
@@ -51,7 +53,16 @@ class ChessMoveGUI {
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
             redraw(fields, brett, images)
-            brett=brett.findBestMove();
+            PrimitiveMoveGenerator generator = new PrimitiveMoveGenerator(brett.board, brett.activePlayerIsWhite);
+            def move = generator.findBestMove()
+            if (null != move)
+            {
+                brett=brett.moveChessPiece(move)
+            }
+            else
+            {
+                System.out.println("Checkmate or stalemate");
+            }
             redraw(fields, brett, images)
         } else {
             println "Sorry, that's an illegal move"
