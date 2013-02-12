@@ -1,8 +1,8 @@
 package de.beyondjava.chess.objectOrientedEngine;
 
-import de.beyondjava.chess.common.Piece;
 import de.beyondjava.chess.common.ChessConstants;
 import de.beyondjava.chess.common.Move;
+import de.beyondjava.chess.common.Piece;
 
 /**
  * Represents the chess board and provide a couple of methods on possible moves.
@@ -12,25 +12,45 @@ import de.beyondjava.chess.common.Move;
 public class ChessboardBasis implements ChessConstants {
     public final int[][] board;
     public final boolean activePlayerIsWhite;
+    public int whiteMaterialValue;
+    public int blackMaterialValue;
+    public int whiteFieldPositionValue; // effectively final
+    public int blackFieldPositionValue; // effectively final
+    public int whiteMoveValue;
+    public int blackMoveValue;
+    public boolean isWhiteKingThreatened;
+    public boolean isBlackKingThreatened;
+    public boolean isWhiteCheckmate;
+    public boolean isBlackCheckmate;
+    public int whiteTotalValue;
+    public int blackTotalValue;
+    public int[] whiteMoves;
+    public int[] blackMoves;
 
+    private ChessboardBasis(boolean activePlayerIsWhite, int[][] board)
+    {
+        this.activePlayerIsWhite=activePlayerIsWhite;
+        this.board=board;
+        evaluateMaterialValue();
+    }
     public ChessboardBasis() {
-        activePlayerIsWhite = true;
-        board = ChessConstants.initialBoard;
+       this(true, ChessConstants.initialBoard);
     }
 
     public ChessboardBasis(boolean activePlayerIsWhite, ChessboardBasis board) {
-        this.board = board.board;
-        this.activePlayerIsWhite = activePlayerIsWhite;
+        this(activePlayerIsWhite, board.board);
     }
 
-    public ChessboardBasis(boolean activePlayerIsWhite, Piece... pieces)
-    {
-        this.activePlayerIsWhite=activePlayerIsWhite;
-        board = new int[8][8];
-        for (Piece p: pieces)
-        {
+    public ChessboardBasis(boolean activePlayerIsWhite, Piece... pieces) {
+        this(activePlayerIsWhite, getBoardFromPieces(pieces));
+    }
+
+    private static int[][] getBoardFromPieces(Piece[] pieces) {
+        int[][] board = new int[8][8];
+        for (Piece p : pieces) {
             board[p.row][p.column] = p.piece;
         }
+        return board;
     }
 
 
@@ -40,7 +60,7 @@ public class ChessboardBasis implements ChessConstants {
             newBoard[row] = new int[8];
             for (int y = 0; y < 8; y++) {
                 int piece = oldBoard.board[row][y];
-                if (piece < 0) piece = 0; // forget en passant
+                if (piece < 0) piece = 0; // forget that en passant once was possible
                 newBoard[row][y] = piece;
             }
         }
@@ -56,10 +76,10 @@ public class ChessboardBasis implements ChessConstants {
         int piece = newBoard[fromRow][fromColumn];
         if (piece == w_bauer)
             if (fromRow - toRow == 2)
-                newBoard[fromRow - 1][toColumn] = -1; // make en passant possible in the opponents move
+                newBoard[fromRow - 1][toColumn] = -1; // allow for en passant
         if (piece == s_bauer)
             if (fromRow - toRow == -2)
-                newBoard[fromRow + 1][toColumn] = -1; // make en passant possible in the opponents move
+                newBoard[fromRow + 1][toColumn] = -1; // allow for en passant
         newBoard[toRow][toColumn] = piece;
         newBoard[fromRow][fromColumn] = 0;
         board = newBoard;
@@ -73,10 +93,10 @@ public class ChessboardBasis implements ChessConstants {
     public Chessboard moveChessPiece(int fromRow, int fromColumn, int toRow, int toColumn) {
         return new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
     }
+
     public Chessboard moveChessPiece(Move move) {
         return new Chessboard(this, move.fromRow, move.fromColumn, move.toRow, move.toColumn);
     }
-
 
     protected boolean isWhitePiece(int piece) {
         if (piece < 2) {
@@ -122,13 +142,30 @@ public class ChessboardBasis implements ChessConstants {
         if (!isInsideBoard(row, column)) return false;
         int piece = board[row][column];
         if (piece <= 0) return true;
-         if (activePlayerIsWhite) {
+        if (activePlayerIsWhite) {
             return (isBlackPiece(piece));
         } else {
             return (isWhitePiece(piece));
         }
     }
 
-
+    private void evaluateMaterialValue() {
+        int whiteValue = 0;
+        int blackValue = 0;
+        for (int fromRow = 0; fromRow < 8; fromRow++)
+            for (int toColumn = 0; toColumn < 8; toColumn++) {
+                int piece = board[fromRow][toColumn];
+                if (isWhitePiece(piece))
+                {
+                    whiteValue+= s_MATERIAL_VALUE[piece];
+                }
+                if (isBlackPiece(piece))
+                {
+                    blackValue += s_MATERIAL_VALUE[piece];
+                }
+            }
+        whiteMaterialValue=whiteValue;
+        blackMaterialValue=blackValue;
+    }
 
 }
