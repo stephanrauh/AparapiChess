@@ -71,28 +71,43 @@ public class LegalMoves extends MaterialValueEvaluator {
         return false;
     }
 
-    public boolean isKingThreatened(boolean whiteKing) {
+    public boolean isOwnKingThreatened(boolean whiteKing) {
+        // to check if our king is threatened, we habe to look at the opponents players moves
         Chessboard test = new Chessboard(!whiteKing, this);
-//        System.out.println("--------------------------");
-        List<Move> possibleMoves = test.getLegalMoves(false);
-        for (Move m : possibleMoves) {
-//            System.out.println("(" + m.fromColumn + m.fromRow + ") -> (" +m.toColumn + m.toRow + ")");
-//            System.out.println(m.materialValueAfterMove);
+        List<Move> opponentsPossibleMoves = test.getLegalMoves(false);
+        for (Move m : opponentsPossibleMoves) {
             boolean check = false;
             int capturedPiece = board[m.toRow][m.toColumn];
-            check |= (capturedPiece == s_koenig && activePlayerIsWhite);
-            check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
+            check |= (capturedPiece == s_koenig && !whiteKing);
+            check |= (capturedPiece == w_koenig && whiteKing);
+            if (check)
+            {
+                return true;
+            }
+        }
+        return false ;
+    }
+
+    public boolean isOpponentsKingThreatened(boolean whiteKing) {
+        Chessboard test = new Chessboard(!whiteKing, this);
+        List<Move> possibleMoves = test.getLegalMoves(false);
+        for (Move m : possibleMoves) {
+            boolean check = false;
+            int capturedPiece = board[m.toRow][m.toColumn];
+            check |= (capturedPiece == w_koenig && activePlayerIsWhite);
+            check |= (capturedPiece == s_koenig && (!activePlayerIsWhite));
             if (check) return true;
         }
         return false;
     }
 
+
     public boolean isBlackKingThreatened() {
-        return isKingThreatened(false);
+        return isOwnKingThreatened(false);
     }
 
     public boolean isWhiteKingThreatened() {
-        return isKingThreatened(true);
+        return isOwnKingThreatened(true);
     }
 
     public List<Move> getLegalMoves(boolean takeCheckIntoAccount) {
@@ -124,7 +139,7 @@ public class LegalMoves extends MaterialValueEvaluator {
         List<Position> r = new ArrayList<>(result.size());
         for (Position p : result) {
             Chessboard n = moveChessPiece(row, column, p.row, p.column);
-            if (!n.isKingThreatened(activePlayerIsWhite))
+            if (!n.isOwnKingThreatened(activePlayerIsWhite))
                 r.add(p);
         }
         return r;

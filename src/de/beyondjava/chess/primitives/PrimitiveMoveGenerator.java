@@ -182,7 +182,7 @@ public class PrimitiveMoveGenerator extends PrimitiveChessBoards {
         List<Position> r = new ArrayList<>(result.size());
         for (Position p : result) {
 //            int newBoard = moveChessPiece(board, row, column, p.row, p.column);
-//            if (!isKingThreatened(newBoard, activePlayerIsWhite))
+//            if (!isOwnKingThreatened(newBoard, activePlayerIsWhite))
             r.add(p);
         }
         return r;

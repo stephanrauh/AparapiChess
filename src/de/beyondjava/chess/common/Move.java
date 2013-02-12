@@ -48,7 +48,7 @@ public class Move implements Comparable<Move> {
         String check = opponentInCheck ? "+" : " ";
         String s = capture ? "x" : "-";
         s += pieceName[capturedPiece + 1];
-        return pieceName[piece + 1] + columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow];
+        return pieceName[piece + 1] + columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow] + check;
     }
 
     public String toString() {

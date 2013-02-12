@@ -43,23 +43,17 @@ public class MoveGenerator extends PositionalValueEvaluator {
         super(oldBoard, fromRow, fromColumn, toRow, toColumn);
     }
 
-    public Chessboard findBestMove() {
+    public Move findBestMove() {
         long start = System.nanoTime();
-        Move bestMove = findBestMove(2);
+        Move bestMove = findBestMove(6);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
         if (bestMove == STALEMATEMOVE) {
             setStalemate(true);
-            return (Chessboard) this;
         } else if (bestMove == CHECKMATEMOVE) {
             setCheckmate(true);
-            return (Chessboard) this;
         }
-        if (null != bestMove) {
-            return moveChessPiece(bestMove.fromRow, bestMove.fromColumn, bestMove.toRow, bestMove.toColumn);
-        } else {
-            return (Chessboard) this;
-        }
+        return bestMove;
     }
 
     public Move findBestMove(int lookahead) {
@@ -133,8 +127,7 @@ public class MoveGenerator extends PositionalValueEvaluator {
 
             return interestingMoves;
         }
-        if (isKingThreatened(!activePlayerIsWhite)) {
-
+        if (isOwnKingThreatened(activePlayerIsWhite)) {
             return CHECKMATEMOVELIST;
         } else {
             return STALEMATEMOVELIST;
