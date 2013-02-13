@@ -14,7 +14,7 @@ import java.util.List;
  * Time: 00:13
  * To change this template use File | Settings | File Templates.
  */
-public class MoveGenerator extends PositionalValueEvaluator {
+public class MoveGenerator extends ChessboardBasis {
 
     public static final Move CHECKMATEMOVE = new Move(0,0, 0, 0, 0, -1000000, false, false,0);
     public static final Move STALEMATEMOVE = new Move(0,0, 0, 0, 0, 0, false, false,0);

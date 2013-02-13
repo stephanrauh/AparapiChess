@@ -4,6 +4,10 @@ import de.beyondjava.chess.common.ChessConstants;
 import de.beyondjava.chess.common.Move;
 import de.beyondjava.chess.common.Piece;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 /**
  * Represents the chess board and provide a couple of methods on possible moves.
  * Date: 02.02.13
@@ -12,29 +16,33 @@ import de.beyondjava.chess.common.Piece;
 public class ChessboardBasis implements ChessConstants {
     public final int[][] board;
     public final boolean activePlayerIsWhite;
-    public int whiteMaterialValue;
-    public int blackMaterialValue;
+    public byte[][] canBeReachedByWhitePiece = new byte[8][8];
+    public byte[][] canBeReachedByBlackPiece = new byte[8][8];
+    public int whiteMaterialValue;      // effectively final
+    public int blackMaterialValue;      // effectively final
     public int whiteFieldPositionValue; // effectively final
     public int blackFieldPositionValue; // effectively final
     public int whiteMoveValue;
     public int blackMoveValue;
+    public int whiteCoverageValue;
+    public int blackCoverageValue;
     public boolean isWhiteKingThreatened;
     public boolean isBlackKingThreatened;
-    public boolean isWhiteCheckmate;
-    public boolean isBlackCheckmate;
-    public int whiteTotalValue;
-    public int blackTotalValue;
-    public int[] whiteMoves;
-    public int[] blackMoves;
+    public int whiteTotalValue;             // effectively final
+    public int blackTotalValue;             // effectively final
+    public int[] whiteMoves = new int[184]; // effectively final
+    public int numberOfWhiteMoves = 0;      // effectively final
+    public int[] blackMoves = new int[184]; // effectively final
+    public int numberOfBlackMoves = 0;      // effectively final
 
-    private ChessboardBasis(boolean activePlayerIsWhite, int[][] board)
-    {
-        this.activePlayerIsWhite=activePlayerIsWhite;
-        this.board=board;
-        evaluateMaterialValue();
+    private ChessboardBasis(boolean activePlayerIsWhite, int[][] board) {
+        this.activePlayerIsWhite = activePlayerIsWhite;
+        this.board = board;
+        evaluateBoard();
     }
+
     public ChessboardBasis() {
-       this(true, ChessConstants.initialBoard);
+        this(true, ChessConstants.initialBoard);
     }
 
     public ChessboardBasis(boolean activePlayerIsWhite, ChessboardBasis board) {
@@ -44,15 +52,6 @@ public class ChessboardBasis implements ChessConstants {
     public ChessboardBasis(boolean activePlayerIsWhite, Piece... pieces) {
         this(activePlayerIsWhite, getBoardFromPieces(pieces));
     }
-
-    private static int[][] getBoardFromPieces(Piece[] pieces) {
-        int[][] board = new int[8][8];
-        for (Piece p : pieces) {
-            board[p.row][p.column] = p.piece;
-        }
-        return board;
-    }
-
 
     public ChessboardBasis(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
         int[][] newBoard = new int[8][8];
@@ -67,11 +66,7 @@ public class ChessboardBasis implements ChessConstants {
 
         if (oldBoard.board[toRow][toColumn] == -1) {
             // capture en passant
-            if (oldBoard.activePlayerIsWhite) {
-                newBoard[fromRow][toColumn] = 0;
-            } else {
-                newBoard[fromRow][toColumn] = 0;
-            }
+            newBoard[fromRow][toColumn] = 0;
         }
         int piece = newBoard[fromRow][fromColumn];
         if (piece == w_bauer)
@@ -84,6 +79,23 @@ public class ChessboardBasis implements ChessConstants {
         newBoard[fromRow][fromColumn] = 0;
         board = newBoard;
         activePlayerIsWhite = !oldBoard.activePlayerIsWhite;
+    }
+
+    private static int[][] getBoardFromPieces(Piece[] pieces) {
+        int[][] board = new int[8][8];
+        for (Piece p : pieces) {
+            board[p.row][p.column] = p.piece;
+        }
+        return board;
+    }
+
+    private void evaluateBoard() {
+        evaluateMaterialValue();
+        evaluateFieldPositionalValue();
+        findLegalMovesIgnoringCheck();
+        evaluateThreats();
+        whiteTotalValue = whiteMaterialValue * 10 + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+        blackTotalValue = blackMaterialValue * 10 + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
     }
 
     public int getChessPiece(int row, int column) {
@@ -155,17 +167,429 @@ public class ChessboardBasis implements ChessConstants {
         for (int fromRow = 0; fromRow < 8; fromRow++)
             for (int toColumn = 0; toColumn < 8; toColumn++) {
                 int piece = board[fromRow][toColumn];
-                if (isWhitePiece(piece))
-                {
-                    whiteValue+= s_MATERIAL_VALUE[piece];
+                if (isWhitePiece(piece)) {
+                    whiteValue += s_MATERIAL_VALUE[piece];
                 }
-                if (isBlackPiece(piece))
-                {
+                if (isBlackPiece(piece)) {
                     blackValue += s_MATERIAL_VALUE[piece];
                 }
             }
-        whiteMaterialValue=whiteValue;
-        blackMaterialValue=blackValue;
+        whiteMaterialValue = whiteValue;
+        blackMaterialValue = blackValue;
+    }
+
+    public void evaluateValueOfLegalMoves() {
+        int whiteValue = numberOfWhiteMoves;
+        for (int i = 0; i < whiteValue; i++) {
+            int gain = whiteMoves[i] >> 16;
+            whiteValue += gain / 100;
+        }
+        whiteMoveValue = whiteValue;
+        int blackValue = numberOfBlackMoves;
+        for (int i = 0; i < blackValue; i++) {
+            int gain = blackMoves[i] >> 16;
+            blackValue += gain / 100;
+        }
+        blackMoveValue = blackValue;
+    }
+
+    private void evaluateFieldPositionalValue() {
+        int whiteValue = 0;
+        int blackValue = 0;
+        for (int row = 0; row < 8; row++)
+            for (int col = 0; col < 8; col++) {
+                int piece = board[row][col];
+                if (piece == w_bauer) {
+                    whiteValue += whitePawnPositions[row][col];
+                } else if (piece == s_bauer) {
+                    blackValue -= whitePawnPositions[7 - row][col];
+                } else if (isWhitePiece(piece)) {
+                    whiteValue += positions[row][col];
+                } else if (isBlackPiece(piece)) {
+                    blackValue -= positions[row][col];
+                }
+            }
+        whiteFieldPositionValue = whiteValue;
+        blackFieldPositionValue = blackValue;
+    }
+    private void evaluateThreats() {
+        int whiteValue = 0;
+        int blackValue = 0;
+        for (int row = 0; row < 8; row++)
+            for (int col = 0; col < 8; col++) {
+                whiteCoverageValue += canBeReachedByWhitePiece[row][col];
+                blackCoverageValue += canBeReachedByBlackPiece[row][col];
+            }
+    }
+
+    public void findLegalMovesIgnoringCheck() {
+        for (int fromRow = 0; fromRow < 8; fromRow++)
+            for (int fromColumn = 0; fromColumn < 8; fromColumn++) {
+                int piece = board[fromRow][fromColumn];
+                if (piece >= 2) {
+                    boolean pieceIsWhite = isWhitePiece(piece);
+                    switch ((piece + 2) >> 2) {
+                        case 1: /* Pawn */
+                            getLegalMovesForAPawn(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                        case 2: /* Rook */
+                            getLegalMovesForARook(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                        case 3: /* knight (Springer) */
+                            getLegalMovesForAKnight(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                        case 4: /* bishop (Laeufer) */
+                            getLegalMovesForABishop(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                        case 5: /* Queen */
+                            getLegalMovesForAQueen(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                        case 6: /* King */
+                            getLegalMovesForAKing(fromRow, fromColumn, pieceIsWhite);
+                            break;
+                    }
+
+/**                    List<Position> targets = takeCheckIntoAccount ? getLegalMovesForAPiece(fromRow, fromColumn) : getLegalMovesForAPieceIgnoringCheck(fromRow, fromColumn);
+ for (Position t : targets) {
+ int capturedPiece = board[t.row][t.column];
+ int valueAfterMove = currentMaterialValue;
+ if (capturedPiece >= 2)
+ valueAfterMove += s_MATERIAL_VALUE[capturedPiece];
+ boolean check = false;
+ check |= (capturedPiece == s_koenig && activePlayerIsWhite);
+ check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
+ Move m = new Move(getChessPiece(fromRow, fromColumn), fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece >= 2, capturedPiece);
+ moves.add(m);
+ }
+ */
+                }
+            }
+    }
+
+    /**
+     * public List<Position> getLegalMovesForAPiece(int row, int column) {
+     * List<Position> result = getLegalMovesForAPieceIgnoringCheck(row, column);
+     * List<Position> r = new ArrayList<>(result.size());
+     * for (Position p : result) {
+     * Chessboard n = moveChessPiece(row, column, p.row, p.column);
+     * if (!n.isOwnKingThreatened(activePlayerIsWhite))
+     * r.add(p);
+     * }
+     * return r;
+     * }
+     */
+
+    private void getLegalMovesForAPawn(int row, int column, boolean pieceIsWhite) {
+        int nr;
+        int nc;
+        int direction = activePlayerIsWhite ? -1 : 1;
+
+        // simple move forward
+        nr = row + direction;
+        nc = column;
+        if (nr < 0 || nr >= 8) {
+            return;
+        }
+        if (isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
+            if (nr==0 && pieceIsWhite)
+            {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, s_springer);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, s_laeufer);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, s_turm);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, s_dame);
+            }
+            else if (nr==7 && (!pieceIsWhite))
+            {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, w_springer);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, w_laeufer);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, w_turm);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, w_dame);
+            }
+            else
+            {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+            }
+            // double move forward
+            if ((row == 6 && pieceIsWhite) || (row == 1 && (!pieceIsWhite))) {
+                // first move
+                nr = row + 2 * direction;
+                nc = column;
+                if (isEmptyField(nr, nc)) {
+                    addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                }
+            }
+        }
+
+        // capture piece at left hand side
+        nr = row + direction;
+        nc = column - 1;
+        if (isOpponentsPiece(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        } else if (canBeCapturedEnPassant(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+
+        // capture piece at right hand side
+        nr = row + direction;
+        nc = column + 1;
+        if (isOpponentsPiece(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        } else if (canBeCapturedEnPassant(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+    }
+
+    private boolean canBeCapturedEnPassant(int nr, int nc) {
+        return isInsideBoard(nr, nc) && (board[nr][nc] == -1);
+    }
+
+    private void getLegalMovesForAQueen(int row, int column, boolean pieceIsWhite) {
+        getLegalMovesForARook(row, column, pieceIsWhite);
+        getLegalMovesForABishop(row, column, pieceIsWhite);
+    }
+
+    private void getLegalMovesForARook(int row, int column, boolean pieceIsWhite) {
+        List result = new ArrayList<Position>();
+        int nr;
+        int nc;
+
+        nr = row;
+        nc = column;
+        while (true) {
+            nr++;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nr--;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nc++;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nc--;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void getLegalMovesForABishop(int row, int column, boolean pieceIsWhite) {
+        int nr;
+        int nc;
+
+        nr = row;
+        nc = column;
+        while (true) {
+            nr++;
+            nc++;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nr--;
+            nc++;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nr++;
+            nc--;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        nr = row;
+        nc = column;
+        while (true) {
+            nr--;
+            nc--;
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+                if (!isEmptyField(nr, nc)) {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void getLegalMovesForAKing(int row, int column, boolean pieceIsWhite) {
+        int nr;
+        int nc;
+
+        nr = row;
+        nc = column;
+        nr++;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nr--;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nc++;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nc--;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nr++;
+        nc++;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nr--;
+        nc++;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nr++;
+        nc--;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+        nr = row;
+        nc = column;
+        nr--;
+        nc--;
+        if (isEmptyOrCanBeCaptured(nr, nc)) {
+            addPossibleMove(row, column, nr, nc, pieceIsWhite);
+        }
+
+    }
+
+    private void getLegalMovesForAKnight(int row, int column, boolean pieceIsWhite) {
+        int nr;
+        int nc;
+        int moveRow[] = {1, 2, 2, 1, -1, -2, -2, -1};
+        int moveCol[] = {-2, -1, 1, 2, -2, -1, 1, 2};
+
+        for (int i = 0; i < moveCol.length; i++) {
+            nr = row + moveRow[i];
+            nc = column + moveCol[i];
+            if (isEmptyOrCanBeCaptured(nr, nc)) {
+                addPossibleMove(row, column, nr, nc, pieceIsWhite);
+            }
+        }
+    }
+
+    public void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite) {
+        int promotedPiece = board[fromRow][fromColumn];
+        addPossibleMove(fromRow, fromColumn, toRow, toColumn, pieceIsWhite, promotedPiece);
+    }
+
+    private void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite, int promotedPiece) {
+        int capturedPiece = board[toRow][toColumn];
+        if (capturedPiece < 0) {
+            capturedPiece = pieceIsWhite ? s_bauer : w_bauer;
+        }
+        else if (capturedPiece==w_koenig)
+        {
+            isWhiteKingThreatened=true;
+        }
+        else if (capturedPiece==s_koenig)
+        {
+            isBlackKingThreatened=true;
+        }
+        int m = move(fromRow, fromColumn, toRow, toColumn, capturedPiece, promotedPiece);
+        if (pieceIsWhite) {
+            whiteMoves[numberOfWhiteMoves++] = m;
+            canBeReachedByWhitePiece[toRow][toColumn]++;
+        } else {
+            blackMoves[numberOfBlackMoves++] = m;
+            canBeReachedByBlackPiece[toRow][toColumn]++;
+        }
+    }
+
+    public int move(int fromRow, int fromColumn, int toRow, int toColumn, int capturedPiece, int promotedPiece) {
+        int capturedValue = s_MATERIAL_VALUE[capturedPiece];
+        int compact = capturedValue << 20 + promotedPiece<<16 + fromRow << 12 + fromColumn << 8 + toRow << 4 + toColumn;
+        return compact;
+    }
+    public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {
+        int compact = move(fromRow, fromColumn, toRow, toColumn, 0, 0);
+        int[] legalMoves;
+        if (activePlayerIsWhite) {
+            legalMoves = whiteMoves;
+        } else {
+            legalMoves = blackMoves;
+        }
+        for (int c : legalMoves) {
+            if ((c & 0xFFFF) == compact) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
