@@ -32,12 +32,12 @@ public interface ChessConstants {
             {8, 12, 16, 20, 24, 16, 12, 8}
     };
     public static final int[] s_MATERIAL_VALUE = {0, 0, // empty fields
-            1000, 1000, 1000, 1000, // pawns
-            5000, 5000, 5000, 5000, // rooks,
-            2750, 2750, 2750, 2750, // knights (Springer)
-            3250, 3250, 3250, 3250, // bishops (Läufer)
-            10000, 10000, 10000, 10000, // queens
-            1000000, 100000, 1000000, 1000000 // kings
+            100, 100, 100, 100, // pawns
+            500, 500, 500, 500, // rooks,
+            275, 275, 275, 275, // knights (Springer)
+            325, 325, 325, 325, // bishops (Läufer)
+            1000, 1000, 1000, 1000, // queens
+            9999, 9999, 9999, 9999 // kings
     };
     String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H"};
     String[] rows = {"8", "7", "6", "5", "4", "3", "2", "1"};

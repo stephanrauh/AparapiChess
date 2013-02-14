@@ -49,21 +49,25 @@ public class MoveGenerator extends ChessboardBasis {
         int[] bestMoves = findBestBlackMoves(6, 5);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
-        int move = blackMoves[0];
+        int move = bestMoves[0];
         int fromRow = (move >> 12) & 0x000F;
         int fromColumn = (move >> 8) & 0x000F;
         int toRow = (move >> 4) & 0x000F;
         int toColumn = move & 0x000F;
+        int promotion = (move >> 16) & 0x00FF;
+        int capturedValue = (move>>24);
 
-        return new Move(getChessPiece(fromColumn, fromRow), fromColumn, fromColumn, toRow, toColumn, 0, false, false, 0);
+        return new Move(getChessPiece(fromColumn, fromRow), fromRow, fromColumn, toRow, toColumn, 0, false, false, 0);
     }
 
     public int[] findBestBlackMoves(int lookAhead, int movesToConsider) {
         int[] moves = Arrays.copyOf(blackMoves, numberOfBlackMoves);
         Arrays.sort(moves);
         List<XMove> evaluatedMoves = new ArrayList<>(moves.length);
-        for (int i = 0; i < moves.length - 1; i++) {
+        for (int i = 0; i < moves.length; i++) {
             int move = moves[i];
+            int capturedValue = (move>>24);
+            int promotion = (move >> 16) & 0x00FF;
             int fromRow = (move >> 12) & 0x000F;
             int fromColumn = (move >> 8) & 0x000F;
             int toRow = (move >> 4) & 0x000F;
@@ -71,6 +75,7 @@ public class MoveGenerator extends ChessboardBasis {
             Chessboard afterMove = new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
             XMove e = new XMove();
             e.move = move;
+            e.piece = getChessPiece(fromRow, fromColumn);
             e.whiteMaterialValue = afterMove.whiteMaterialValue;
             e.blackMaterialValue = afterMove.blackMaterialValue;
             e.whiteFieldPositionValue = afterMove.whiteFieldPositionValue;

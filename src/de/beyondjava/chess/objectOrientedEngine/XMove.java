@@ -1,5 +1,7 @@
 package de.beyondjava.chess.objectOrientedEngine;
 
+import de.beyondjava.chess.common.Move;
+
 /**
  * Created with IntelliJ IDEA.
  * User: SoyYo
@@ -23,9 +25,43 @@ public class XMove implements Comparable<XMove> {
     public int blackTotalValue;
     public int numberOfWhiteMoves;
     public int numberOfBlackMoves ;
+    public int piece;
 
     @Override
     public int compareTo(XMove o) {
-        return whiteTotalValue-blackTotalValue;
+        return (whiteTotalValue-blackTotalValue) - (o.whiteTotalValue-o.blackTotalValue);
+    }
+
+    public String getNotation()
+    {
+        int fromRow = (move >> 12) & 0x000F;
+        int fromColumn = (move >> 8) & 0x000F;
+        int toRow = (move >> 4) & 0x000F;
+        int toColumn = move & 0x000F;
+        System.out.println(move>>24);
+        boolean capture = (move >> 24)>0;
+
+        Move m = new Move(piece, fromRow, fromColumn, toRow, toColumn, 0, false, capture, 0 );
+        return m.getNotation();
+    }
+    public String toString()
+    {
+        String wm = String.format(" WM: %4d", whiteMaterialValue);
+        String bm = String.format(" BM: %4d", blackMaterialValue);
+        String wf = String.format(" WF: %4d", whiteFieldPositionValue);
+        String bf = String.format(" BF: %4d", blackFieldPositionValue);
+        String wmv = String.format(" WMv: %4d", whiteMoveValue);
+        String bmv = String.format(" Bmv: %4d", blackMoveValue);
+        String wc = String.format(" WC: %4d", whiteCoverageValue);
+        String bc = String.format(" BC: %4d", blackCoverageValue);
+        String wt = String.format(" MT: %4d", whiteTotalValue);
+        String bt = String.format(" BT: %4d ", blackTotalValue);
+        String total = String.format("T: %6d ", whiteTotalValue-blackTotalValue);
+        if ((piece&0x2)>0)
+        {
+            // black move
+            total=String.format("T: %6d ", -whiteTotalValue+blackTotalValue);
+        }
+        return total + wm + bm + wf + bf + wc + bc + wt + bt + getNotation();
     }
 }

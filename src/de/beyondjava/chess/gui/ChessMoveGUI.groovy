@@ -77,14 +77,14 @@ class ChessMoveGUI {
         KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 Move move = brett.findBestMove();
-                if ((!brett.stalemate) && (!brett.checkmate)) {
+//                if ((!brett.stalemate) && (!brett.checkmate)) {
                     if (null != move) {
                         addMoveNotation(brett, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
                         brett = brett.moveChessPiece(move)
                         ChessGUIRemoteControl.chessboard=brett
                     } else
                         checkmate.text = "(error)"
-                }
+//                }
                 redraw(fields, brett, images, checkmate, whiteMoves, blackMoves)
             }
         });

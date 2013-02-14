@@ -143,21 +143,21 @@ public class ChessboardBasis implements ChessConstants {
         return false;
     }
 
-    protected boolean isOpponentsPiece(int row, int column) {
+    protected boolean isOpponentsPiece(int row, int column, boolean p_activePlayerIsWhite) {
         if (!isInsideBoard(row, column)) return false;
         if (board[row][column] <= 0) return false;
-        if (activePlayerIsWhite) {
+        if (p_activePlayerIsWhite) {
             return (isBlackPiece(board[row][column]));
         } else {
             return (isWhitePiece(board[row][column]));
         }
     }
 
-    protected boolean isEmptyOrCanBeCaptured(int row, int column) {
+    protected boolean isEmptyOrCanBeCaptured(int row, int column, boolean p_activePlayerIsWhite) {
         if (!isInsideBoard(row, column)) return false;
         int piece = board[row][column];
         if (piece <= 0) return true;
-        if (activePlayerIsWhite) {
+        if (p_activePlayerIsWhite) {
             return (isBlackPiece(piece));
         } else {
             return (isWhitePiece(piece));
@@ -177,21 +177,21 @@ public class ChessboardBasis implements ChessConstants {
                     blackValue += s_MATERIAL_VALUE[piece];
                 }
             }
-        whiteMaterialValue = whiteValue;
-        blackMaterialValue = blackValue;
+        whiteMaterialValue = whiteValue-13999; // normalization (13999=initial sum)
+        blackMaterialValue = blackValue-13999; // normalization (13999=initial sum)
     }
 
     public void evaluateValueOfLegalMoves() {
         int whiteValue = numberOfWhiteMoves;
         for (int i = 0; i < whiteValue; i++) {
-            int gain = whiteMoves[i] >> 16;
-            whiteValue += gain / 100;
+            int gain = whiteMoves[i] >> 24;
+            whiteValue += gain / 10;
         }
         whiteMoveValue = whiteValue;
         int blackValue = numberOfBlackMoves;
         for (int i = 0; i < blackValue; i++) {
-            int gain = blackMoves[i] >> 16;
-            blackValue += gain / 100;
+            int gain = blackMoves[i] >> 24;
+            blackValue += gain / 10;
         }
         blackMoveValue = blackValue;
     }
@@ -205,11 +205,11 @@ public class ChessboardBasis implements ChessConstants {
                 if (piece == w_bauer) {
                     whiteValue += whitePawnPositions[row][col];
                 } else if (piece == s_bauer) {
-                    blackValue -= whitePawnPositions[7 - row][col];
+                    blackValue += whitePawnPositions[7 - row][col];
                 } else if (isWhitePiece(piece)) {
                     whiteValue += positions[row][col];
                 } else if (isBlackPiece(piece)) {
-                    blackValue -= positions[row][col];
+                    blackValue += positions[row][col];
                 }
             }
         whiteFieldPositionValue = whiteValue;
@@ -252,40 +252,14 @@ public class ChessboardBasis implements ChessConstants {
                             break;
                     }
 
-/**                    List<Position> targets = takeCheckIntoAccount ? getLegalMovesForAPiece(fromRow, fromColumn) : getLegalMovesForAPieceIgnoringCheck(fromRow, fromColumn);
- for (Position t : targets) {
- int capturedPiece = board[t.row][t.column];
- int valueAfterMove = currentMaterialValue;
- if (capturedPiece >= 2)
- valueAfterMove += s_MATERIAL_VALUE[capturedPiece];
- boolean check = false;
- check |= (capturedPiece == s_koenig && activePlayerIsWhite);
- check |= (capturedPiece == w_koenig && (!activePlayerIsWhite));
- Move m = new Move(getChessPiece(fromRow, fromColumn), fromRow, fromColumn, t.row, t.column, valueAfterMove, check, capturedPiece >= 2, capturedPiece);
- moves.add(m);
- }
- */
                 }
             }
     }
 
-    /**
-     * public List<Position> getLegalMovesForAPiece(int row, int column) {
-     * List<Position> result = getLegalMovesForAPieceIgnoringCheck(row, column);
-     * List<Position> r = new ArrayList<>(result.size());
-     * for (Position p : result) {
-     * Chessboard n = moveChessPiece(row, column, p.row, p.column);
-     * if (!n.isOwnKingThreatened(activePlayerIsWhite))
-     * r.add(p);
-     * }
-     * return r;
-     * }
-     */
-
     private void getLegalMovesForAPawn(int row, int column, boolean pieceIsWhite) {
         int nr;
         int nc;
-        int direction = activePlayerIsWhite ? -1 : 1;
+        int direction = pieceIsWhite ? -1 : 1;
 
         // simple move forward
         nr = row + direction;
@@ -326,7 +300,7 @@ public class ChessboardBasis implements ChessConstants {
         // capture piece at left hand side
         nr = row + direction;
         nc = column - 1;
-        if (isOpponentsPiece(nr, nc)) {
+        if (isOpponentsPiece(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         } else if (canBeCapturedEnPassant(nr, nc)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
@@ -335,7 +309,7 @@ public class ChessboardBasis implements ChessConstants {
         // capture piece at right hand side
         nr = row + direction;
         nc = column + 1;
-        if (isOpponentsPiece(nr, nc)) {
+        if (isOpponentsPiece(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         } else if (canBeCapturedEnPassant(nr, nc)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
@@ -360,7 +334,7 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         while (true) {
             nr++;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -373,7 +347,7 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         while (true) {
             nr--;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -386,7 +360,7 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         while (true) {
             nc++;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc,pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -399,7 +373,7 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         while (true) {
             nc--;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -419,7 +393,7 @@ public class ChessboardBasis implements ChessConstants {
         while (true) {
             nr++;
             nc++;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -433,7 +407,7 @@ public class ChessboardBasis implements ChessConstants {
         while (true) {
             nr--;
             nc++;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -447,7 +421,7 @@ public class ChessboardBasis implements ChessConstants {
         while (true) {
             nr++;
             nc--;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -461,7 +435,7 @@ public class ChessboardBasis implements ChessConstants {
         while (true) {
             nr--;
             nc--;
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -479,53 +453,53 @@ public class ChessboardBasis implements ChessConstants {
         nr = row;
         nc = column;
         nr++;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr--;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nc++;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nc--;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr++;
         nc++;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr--;
         nc++;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr++;
         nc--;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr--;
         nc--;
-        if (isEmptyOrCanBeCaptured(nr, nc)) {
+        if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
 
@@ -540,14 +514,14 @@ public class ChessboardBasis implements ChessConstants {
         for (int i = 0; i < moveCol.length; i++) {
             nr = row + moveRow[i];
             nc = column + moveCol[i];
-            if (isEmptyOrCanBeCaptured(nr, nc)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
             }
         }
     }
 
     public void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite) {
-        int promotedPiece = board[fromRow][fromColumn];
+        int promotedPiece =0;
         addPossibleMove(fromRow, fromColumn, toRow, toColumn, pieceIsWhite, promotedPiece);
     }
 
@@ -576,7 +550,7 @@ public class ChessboardBasis implements ChessConstants {
 
     public int move(int fromRow, int fromColumn, int toRow, int toColumn, int capturedPiece, int promotedPiece) {
         int capturedValue = s_MATERIAL_VALUE[capturedPiece];
-        int compact = (capturedValue << 20) + (promotedPiece<<16) + (fromRow << 12) + (fromColumn << 8) + (toRow << 4) + toColumn;
+        int compact = (capturedValue << 24) + (promotedPiece<<16) + (fromRow << 12) + (fromColumn << 8) + (toRow << 4) + toColumn;
         return compact;
     }
     public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {
