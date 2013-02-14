@@ -4,6 +4,7 @@ import de.beyondjava.chess.common.Move;
 import de.beyondjava.chess.common.Piece;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,8 +17,8 @@ import java.util.List;
  */
 public class MoveGenerator extends ChessboardBasis {
 
-    public static final Move CHECKMATEMOVE = new Move(0,0, 0, 0, 0, -1000000, false, false,0);
-    public static final Move STALEMATEMOVE = new Move(0,0, 0, 0, 0, 0, false, false,0);
+    public static final Move CHECKMATEMOVE = new Move(0, 0, 0, 0, 0, -1000000, false, false, 0);
+    public static final Move STALEMATEMOVE = new Move(0, 0, 0, 0, 0, 0, false, false, 0);
     public static final ArrayList<Move> CHECKMATEMOVELIST = new ArrayList<Move>() {{
         add(CHECKMATEMOVE);
     }};
@@ -45,94 +46,55 @@ public class MoveGenerator extends ChessboardBasis {
 
     public Move findBestMove() {
         long start = System.nanoTime();
-        Move bestMove = findBestMove(6);
+        int[] bestMoves = findBestBlackMoves(6, 5);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
-        if (bestMove == STALEMATEMOVE) {
-            setStalemate(true);
-        } else if (bestMove == CHECKMATEMOVE) {
-            setCheckmate(true);
-        }
-        return bestMove;
+        int move = blackMoves[0];
+        int fromRow = (move >> 12) & 0x000F;
+        int fromColumn = (move >> 8) & 0x000F;
+        int toRow = (move >> 4) & 0x000F;
+        int toColumn = move & 0x000F;
+
+        return new Move(getChessPiece(fromColumn, fromRow), fromColumn, fromColumn, toRow, toColumn, 0, false, false, 0);
     }
 
-    public Move findBestMove(int lookahead) {
-        List<Move> possibleMoves = findBestMoves(lookahead, 5);
-        if (possibleMoves == STALEMATEMOVELIST) return STALEMATEMOVE;
-        if (possibleMoves == CHECKMATEMOVELIST) return CHECKMATEMOVE;
-
-        if (possibleMoves.size() > 0) {
-            Move bestMove = possibleMoves.get(0);
-            return bestMove;
+    public int[] findBestBlackMoves(int lookAhead, int movesToConsider) {
+        int[] moves = Arrays.copyOf(blackMoves, numberOfBlackMoves);
+        Arrays.sort(moves);
+        List<XMove> evaluatedMoves = new ArrayList<>(moves.length);
+        for (int i = 0; i < moves.length - 1; i++) {
+            int move = moves[i];
+            int fromRow = (move >> 12) & 0x000F;
+            int fromColumn = (move >> 8) & 0x000F;
+            int toRow = (move >> 4) & 0x000F;
+            int toColumn = move & 0x000F;
+            Chessboard afterMove = new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
+            XMove e = new XMove();
+            e.move = move;
+            e.whiteMaterialValue = afterMove.whiteMaterialValue;
+            e.blackMaterialValue = afterMove.blackMaterialValue;
+            e.whiteFieldPositionValue = afterMove.whiteFieldPositionValue;
+            e.blackFieldPositionValue = afterMove.blackFieldPositionValue;
+            e.whiteMoveValue = afterMove.whiteMoveValue;
+            e.blackMoveValue = afterMove.blackMoveValue;
+            e.whiteCoverageValue = afterMove.whiteCoverageValue;
+            e.blackCoverageValue = afterMove.blackCoverageValue;
+            e.isWhiteKingThreatened = afterMove.isWhiteKingThreatened;
+            e.isBlackKingThreatened = afterMove.isBlackKingThreatened;
+            e.whiteTotalValue = afterMove.whiteTotalValue;
+            e.blackTotalValue = afterMove.blackTotalValue;
+            e.numberOfWhiteMoves = afterMove.numberOfWhiteMoves;
+            e.numberOfBlackMoves = afterMove.numberOfBlackMoves;
+            evaluatedMoves.add(e);
         }
-        System.out.println("This line shouldn't be reached! (MoveGenerator.findBestMove)");
-        return null;
+        Collections.sort(evaluatedMoves);
+        int size = movesToConsider;
+        if (evaluatedMoves.size() < size) size = evaluatedMoves.size();
+        int[] bestMoves = new int[size];
+        for (int i = 0; i < movesToConsider && i < size; i++) {
+            bestMoves[i] = evaluatedMoves.get(i).move;
+        }
+        return bestMoves;
     }
-
-    public List<Move> findBestMoves(int lookAhead, int count) {
-        List<Move> myBestMoves = findBestMoves(count);
-        if (lookAhead <= 1) {
-            return myBestMoves;
-        }
-        if (myBestMoves == STALEMATEMOVELIST || myBestMoves == CHECKMATEMOVELIST) {
-            return myBestMoves;
-        }
-        for (Move m : myBestMoves) {
-            Chessboard b = moveChessPiece(m);
-            Move opponentsBestMove = b.findBestMove(lookAhead - 1);
-            b = moveChessPiece(opponentsBestMove);
-            int mat = b.evalMaterialPosition();
-            int pos = b.evalPositionalValue();
-            m.materialValueAfterMove = -mat;
-            m.positionalValue = -pos;
-        }
-        Collections.sort(myBestMoves);
-        List<Move> interestingMoves = new ArrayList<>();
-        for (int i = 0; i < count && i < myBestMoves.size(); i++) {
-            if (i >= 0) {
-                interestingMoves.add(myBestMoves.get(i));
-                String leer = "";
-                for (int k = lookAhead; k < 6; k++) {
-                    leer += "  ";
-                }
-                System.out.println(leer + "findBestMoves(" + lookAhead + ", " + count + ") = " + myBestMoves.get(i));
-            }
-        }
-        return interestingMoves;
-    }
-
-    public List<Move> findBestMoves(int count) {
-        List<Move> possibleMoves = getLegalMoves(true);
-        for (Move m : possibleMoves) {
-            Chessboard b = moveChessPiece(m);
-            int pos = -b.evalPositionalValue();
- //           if (m.fromColumn == 4 || m.fromColumn == 3)            // DEBUG
-//                if (m.toRow == 3) // DEBUG
-//                   pos = bb.evalPositionalValue(); // DEBUG
-
-            m.positionalValue = pos;
-        }
-        Collections.sort(possibleMoves);
-//        for (Move m : possibleMoves) {
-//            System.out.println(m);
-//        }
-        if (possibleMoves.size() > 0) {
-            List<Move> interestingMoves = new ArrayList<>();
-            for (int i = possibleMoves.size() - 1; i >= possibleMoves.size() - count; i--) {
-                if (i >= 0)
-//                    if (activePlayerIsWhite || possibleMoves.get(i).fromColumn == 4 || possibleMoves.get(i).fromColumn == 3)            // DEBUG
-//                        if (activePlayerIsWhite || possibleMoves.get(i).toRow == 3) // DEBUG
-                            interestingMoves.add(possibleMoves.get(i));
-            }
-
-            return interestingMoves;
-        }
-        if (isOwnKingThreatened(activePlayerIsWhite)) {
-            return CHECKMATEMOVELIST;
-        } else {
-            return STALEMATEMOVELIST;
-        }
-    }
-
 
 }

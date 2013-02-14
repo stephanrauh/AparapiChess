@@ -54,6 +54,10 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     public ChessboardBasis(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
+        this(!oldBoard.activePlayerIsWhite, getNewBoard(oldBoard, fromRow, fromColumn, toRow, toColumn));
+    }
+
+    private static int[][] getNewBoard(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
         int[][] newBoard = new int[8][8];
         for (int row = 0; row < 8; row++) {
             newBoard[row] = new int[8];
@@ -77,8 +81,7 @@ public class ChessboardBasis implements ChessConstants {
                 newBoard[fromRow + 1][toColumn] = -1; // allow for en passant
         newBoard[toRow][toColumn] = piece;
         newBoard[fromRow][fromColumn] = 0;
-        board = newBoard;
-        activePlayerIsWhite = !oldBoard.activePlayerIsWhite;
+        return newBoard;
     }
 
     private static int[][] getBoardFromPieces(Piece[] pieces) {
@@ -573,7 +576,7 @@ public class ChessboardBasis implements ChessConstants {
 
     public int move(int fromRow, int fromColumn, int toRow, int toColumn, int capturedPiece, int promotedPiece) {
         int capturedValue = s_MATERIAL_VALUE[capturedPiece];
-        int compact = capturedValue << 20 + promotedPiece<<16 + fromRow << 12 + fromColumn << 8 + toRow << 4 + toColumn;
+        int compact = (capturedValue << 20) + (promotedPiece<<16) + (fromRow << 12) + (fromColumn << 8) + (toRow << 4) + toColumn;
         return compact;
     }
     public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {

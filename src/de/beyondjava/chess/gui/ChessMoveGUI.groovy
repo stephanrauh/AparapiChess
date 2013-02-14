@@ -111,7 +111,7 @@ class ChessMoveGUI {
         }
         Move m = new Move(brett.getChessPiece(fromRow, fromColumn), fromRow, fromColumn, toRow, toColumn, 0, false, 0 != capturedPiece, capturedPiece)
         Chessboard newBoard = brett.moveChessPiece(m)
-        boolean check = newBoard.isOpponentsKingThreatened(newBoard.activePlayerIsWhite)
+        boolean check = brett.activePlayerIsWhite? newBoard.isBlackKingThreatened:newBoard.isWhiteKingThreatened
         m.opponentInCheck = check
         return m.getNotation()
     }
@@ -124,11 +124,12 @@ class ChessMoveGUI {
                                 fields[row][column].setImage(images.getImage(brett.getChessPiece(row, column), row, column))
                             }
                 }
-        if (brett.isStalemate()) {
-            checkmate.text = "Stalemate!"
-        } else if (brett.isCheckmate()) {
-            checkmate.text = "Stalemate!"
-        } else if (brett.activePlayerIsWhite) {
+//        if (brett.isStalemate()) {
+//            checkmate.text = "Stalemate!"
+//        } else if (brett.isCheckmate()) {
+//            checkmate.text = "Stalemate!"
+//        } else
+        if (brett.activePlayerIsWhite) {
             checkmate.text = "white move"
         } else {
             checkmate.text = "black move"
