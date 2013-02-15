@@ -27,6 +27,8 @@ public class XMove implements Comparable<XMove> {
     public int numberOfBlackMoves ;
     public int piece;
     public Chessboard boardAfterMove;
+    public boolean stalemate;
+    public boolean checkmate;
 
     @Override
     public int compareTo(XMove o) {
