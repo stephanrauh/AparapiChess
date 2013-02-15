@@ -26,6 +26,7 @@ public class XMove implements Comparable<XMove> {
     public int numberOfWhiteMoves;
     public int numberOfBlackMoves ;
     public int piece;
+    public Chessboard boardAfterMove;
 
     @Override
     public int compareTo(XMove o) {
@@ -38,9 +39,7 @@ public class XMove implements Comparable<XMove> {
         int fromColumn = (move >> 8) & 0x000F;
         int toRow = (move >> 4) & 0x000F;
         int toColumn = move & 0x000F;
-        System.out.println(move>>24);
         boolean capture = (move >> 24)>0;
-
         Move m = new Move(piece, fromRow, fromColumn, toRow, toColumn, 0, false, capture, 0 );
         return m.getNotation();
     }
@@ -54,7 +53,7 @@ public class XMove implements Comparable<XMove> {
         String bmv = String.format(" Bmv: %4d", blackMoveValue);
         String wc = String.format(" WC: %4d", whiteCoverageValue);
         String bc = String.format(" BC: %4d", blackCoverageValue);
-        String wt = String.format(" MT: %4d", whiteTotalValue);
+        String wt = String.format(" WT: %4d", whiteTotalValue);
         String bt = String.format(" BT: %4d ", blackTotalValue);
         String total = String.format("T: %6d ", whiteTotalValue-blackTotalValue);
         if ((piece&0x2)>0)
@@ -64,4 +63,6 @@ public class XMove implements Comparable<XMove> {
         }
         return total + wm + bm + wf + bf + wc + bc + wt + bt + getNotation();
     }
+
 }
+
