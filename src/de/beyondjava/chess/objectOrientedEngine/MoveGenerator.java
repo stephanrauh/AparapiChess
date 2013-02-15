@@ -43,7 +43,7 @@ public class MoveGenerator extends ChessboardBasis {
 
     public Move findBestMove() {
         long start = System.nanoTime();
-        int[] bestMoves = findBestBlackMoves(6, 5);
+        int[] bestMoves = findBestBlackMoves(3, 5);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
         int move = bestMoves[0];
@@ -68,7 +68,7 @@ public class MoveGenerator extends ChessboardBasis {
         if (lookAhead > 0) {
             for (int i = 0; i < size; i++) {
                 XMove e = (XMove) bestEvaluatedMoves.get(i);
-                int[] whiteMoves = e.boardAfterMove.findBestWhiteMoves(0, movesToConsider);
+                int[] whiteMoves = e.boardAfterMove.findBestWhiteMoves(lookAhead-1, movesToConsider);
                 if (null == whiteMoves || whiteMoves.length == 0) {
                     if (e.boardAfterMove.isWhiteKingThreatened) {
                         e.checkmate = true;
@@ -103,7 +103,7 @@ public class MoveGenerator extends ChessboardBasis {
         if (lookAhead > 0) {
             for (int i = 0; i < size; i++) {
                 XMove e = (XMove) bestEvaluatedMoves.get(i);
-                int[] blackMoves = e.boardAfterMove.findBestBlackMoves(0, 1);
+                int[] blackMoves = e.boardAfterMove.findBestBlackMoves(lookAhead-1, movesToConsider);
                 if (null == blackMoves || blackMoves.length == 0) {
                     if (e.boardAfterMove.isBlackKingThreatened) {
                         e.checkmate = true;
