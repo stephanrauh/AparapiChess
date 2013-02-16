@@ -43,7 +43,7 @@ public class MoveGenerator extends ChessboardBasis {
 
     public Move findBestMove() {
         long start = System.nanoTime();
-        int[] bestMoves = findBestBlackMoves(3, 5);
+        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(2, 6) : findBestBlackMoves(2, 6);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms");
         int move = bestMoves[0];
@@ -60,7 +60,7 @@ public class MoveGenerator extends ChessboardBasis {
     public int[] findBestBlackMoves(int lookAhead, int movesToConsider) {
         Comparator moveComparator = new BlackMoveComparator();
         int[] moves = Arrays.copyOf(blackMoves, numberOfBlackMoves);
-        List<XMove> evaluatedMoves = findBestMovesWithoutRecursion(moves);
+        List<XMove> evaluatedMoves = findBestMovesWithoutRecursion(moves, s_BLACK);
         int size = movesToConsider;
         if (evaluatedMoves.size() < size) size = evaluatedMoves.size();
         List<XMove> bestEvaluatedMoves = evaluatedMoves.subList(0, size);
@@ -68,7 +68,7 @@ public class MoveGenerator extends ChessboardBasis {
         if (lookAhead > 0) {
             for (int i = 0; i < size; i++) {
                 XMove e = (XMove) bestEvaluatedMoves.get(i);
-                int[] whiteMoves = e.boardAfterMove.findBestWhiteMoves(lookAhead-1, movesToConsider);
+                int[] whiteMoves = e.boardAfterMove.findBestWhiteMoves(lookAhead - 1, movesToConsider);
                 if (null == whiteMoves || whiteMoves.length == 0) {
                     if (e.boardAfterMove.isWhiteKingThreatened) {
                         e.checkmate = true;
@@ -95,7 +95,7 @@ public class MoveGenerator extends ChessboardBasis {
     public int[] findBestWhiteMoves(int lookAhead, int movesToConsider) {
         Comparator moveComparator = new WhiteMoveComparator();
         int[] moves = Arrays.copyOf(whiteMoves, numberOfWhiteMoves);
-        List<XMove> evaluatedMoves = findBestMovesWithoutRecursion(moves);
+        List<XMove> evaluatedMoves = findBestMovesWithoutRecursion(moves, s_WHITE);
         int size = movesToConsider;
         if (evaluatedMoves.size() < size) size = evaluatedMoves.size();
         List<XMove> bestEvaluatedMoves = evaluatedMoves.subList(0, size);
@@ -103,7 +103,7 @@ public class MoveGenerator extends ChessboardBasis {
         if (lookAhead > 0) {
             for (int i = 0; i < size; i++) {
                 XMove e = (XMove) bestEvaluatedMoves.get(i);
-                int[] blackMoves = e.boardAfterMove.findBestBlackMoves(lookAhead-1, movesToConsider);
+                int[] blackMoves = e.boardAfterMove.findBestBlackMoves(lookAhead - 1, movesToConsider);
                 if (null == blackMoves || blackMoves.length == 0) {
                     if (e.boardAfterMove.isBlackKingThreatened) {
                         e.checkmate = true;
@@ -154,8 +154,7 @@ public class MoveGenerator extends ChessboardBasis {
         }
     }
 
-    private List<XMove> findBestMovesWithoutRecursion(int[] moves) {
-        Arrays.sort(moves);
+    private List<XMove> findBestMovesWithoutRecursion(int[] moves, boolean p_activePlayerIsWhite) {
         List<XMove> evaluatedMoves = new ArrayList<>(moves.length);
         for (int i = 0; i < moves.length; i++) {
             int move = moves[i];
@@ -188,7 +187,10 @@ public class MoveGenerator extends ChessboardBasis {
                 evaluatedMoves.add(e);
             }
         }
-        Collections.sort(evaluatedMoves);
+        if (p_activePlayerIsWhite)
+            Collections.sort(evaluatedMoves, new WhiteMoveComparator());
+        else
+            Collections.sort(evaluatedMoves, new BlackMoveComparator());
         return evaluatedMoves;
     }
 

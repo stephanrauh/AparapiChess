@@ -8,6 +8,8 @@ package de.beyondjava.chess.common;
  * To change this template use File | Settings | File Templates.
  */
 public interface ChessConstants {
+    public static final boolean s_WHITE = true;
+    public static final boolean s_BLACK = false;
     public static final int s_empty = 0;
     public static final int w_empty = 1;
     public static final int s_bauer = 2;
