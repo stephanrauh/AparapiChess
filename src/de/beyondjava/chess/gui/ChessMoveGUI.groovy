@@ -1,8 +1,9 @@
 package de.beyondjava.chess.gui
-
 import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
+import de.beyondjava.chess.objectOrientedEngine.BlackIsCheckMateException
 import de.beyondjava.chess.objectOrientedEngine.Chessboard
+import de.beyondjava.chess.objectOrientedEngine.WhiteIsCheckMateException
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.event.ActionEvent
@@ -10,7 +11,6 @@ import javafx.event.EventHandler
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
 import javafx.util.Duration
-
 /**
  * This class tries to make sense out of the users mouse clicks.
  * User: SoyYo
@@ -81,6 +81,8 @@ class ChessMoveGUI {
         time.setCycleCount(1);
         KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
+                try {
+
                 Move move = board.findBestMove();
 //                if ((!board.stalemate) && (!board.checkmate)) {
                 if (null != move) {
@@ -93,6 +95,19 @@ class ChessMoveGUI {
                 } else
                     checkmate.text = "(error)"
 //                }
+                }
+                catch (WhiteIsCheckMateException p_win)
+                {
+                    checkmate.text = "Checkmate!\nBlack wins!"
+                }
+                catch (BlackIsCheckMateException p_win)
+                {
+                    checkmate.text = "Checkmate!\nWhite wins!"
+                }
+                catch (EndOfGameException)
+                {
+                    checkmate.text="Stalemate!"
+                }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
             }
         });

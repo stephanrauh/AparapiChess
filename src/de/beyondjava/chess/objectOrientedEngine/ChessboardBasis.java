@@ -177,8 +177,8 @@ public class ChessboardBasis implements ChessConstants {
                     blackValue += s_MATERIAL_VALUE[piece];
                 }
             }
-        whiteMaterialValue = whiteValue-13999; // normalization (13999=initial sum)
-        blackMaterialValue = blackValue-13999; // normalization (13999=initial sum)
+        whiteMaterialValue = whiteValue - 13999; // normalization (13999=initial sum)
+        blackMaterialValue = blackValue - 13999; // normalization (13999=initial sum)
     }
 
     public void evaluateValueOfLegalMoves() {
@@ -215,6 +215,7 @@ public class ChessboardBasis implements ChessConstants {
         whiteFieldPositionValue = whiteValue;
         blackFieldPositionValue = blackValue;
     }
+
     private void evaluateThreats() {
         int whiteValue = 0;
         int blackValue = 0;
@@ -268,22 +269,17 @@ public class ChessboardBasis implements ChessConstants {
             return;
         }
         if (isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
-            if (nr==0 && pieceIsWhite)
-            {
+            if (nr == 0 && pieceIsWhite) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, s_springer);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, s_laeufer);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, s_turm);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, s_dame);
-            }
-            else if (nr==7 && (!pieceIsWhite))
-            {
+            } else if (nr == 7 && (!pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, w_springer);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, w_laeufer);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, w_turm);
                 addPossibleMove(row, column, nr, nc, pieceIsWhite, w_dame);
-            }
-            else
-            {
+            } else {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
             }
             // double move forward
@@ -360,7 +356,7 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         while (true) {
             nc++;
-            if (isEmptyOrCanBeCaptured(nr, nc,pieceIsWhite)) {
+            if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
                 if (!isEmptyField(nr, nc)) {
                     break;
@@ -521,7 +517,7 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     public void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite) {
-        int promotedPiece =0;
+        int promotedPiece = 0;
         addPossibleMove(fromRow, fromColumn, toRow, toColumn, pieceIsWhite, promotedPiece);
     }
 
@@ -529,14 +525,10 @@ public class ChessboardBasis implements ChessConstants {
         int capturedPiece = board[toRow][toColumn];
         if (capturedPiece < 0) {
             capturedPiece = pieceIsWhite ? s_bauer : w_bauer;
-        }
-        else if (capturedPiece==w_koenig)
-        {
-            isWhiteKingThreatened=true;
-        }
-        else if (capturedPiece==s_koenig)
-        {
-            isBlackKingThreatened=true;
+        } else if (capturedPiece == w_koenig) {
+            isWhiteKingThreatened = true;
+        } else if (capturedPiece == s_koenig) {
+            isBlackKingThreatened = true;
         }
         int m = move(fromRow, fromColumn, toRow, toColumn, capturedPiece, promotedPiece);
         if (pieceIsWhite) {
@@ -550,9 +542,10 @@ public class ChessboardBasis implements ChessConstants {
 
     public int move(int fromRow, int fromColumn, int toRow, int toColumn, int capturedPiece, int promotedPiece) {
         int capturedValue = s_MATERIAL_VALUE[capturedPiece];
-        int compact = (capturedValue << 24) + (promotedPiece<<16) + (fromRow << 12) + (fromColumn << 8) + (toRow << 4) + toColumn;
+        int compact = (capturedValue << 24) + (promotedPiece << 16) + (fromRow << 12) + (fromColumn << 8) + (toRow << 4) + toColumn;
         return compact;
     }
+
     public boolean isMovePossible(int fromRow, int fromColumn, int toRow, int toColumn) {
         int compact = move(fromRow, fromColumn, toRow, toColumn, 0, 0);
         int[] legalMoves;
@@ -563,7 +556,19 @@ public class ChessboardBasis implements ChessConstants {
         }
         for (int c : legalMoves) {
             if ((c & 0xFFFF) == compact) {
-                return true;
+                Chessboard b = moveChessPiece(new Move(0, fromRow, fromColumn, toRow, toColumn, 0, false, false, 0));
+                try {
+                    if (b.activePlayerIsWhite) {
+                        b.findBestWhiteMoves(0, 1);
+                    } else {
+                        b.findBestBlackMoves(0, 1);
+                    }
+                    return true;
+                } catch (CheckMateException p_impossibleMove) {
+                    return false;
+                } catch (EndOfGameException e) {
+                    return true;
+                }
             }
         }
         return false;
