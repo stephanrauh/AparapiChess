@@ -14,12 +14,21 @@ import java.util.List;
  * Time: 19:17
  */
 public class ChessboardBasis implements ChessConstants {
+    public static int evaluatedPositions=0;
     public final int[][] board;
     public final boolean activePlayerIsWhite;
     public byte[][] canBeReachedByWhitePiece = new byte[8][8];
     public byte[][] canBeReachedByBlackPiece = new byte[8][8];
     public int whiteMaterialValue;      // effectively final
     public int blackMaterialValue;      // effectively final
+    /**
+     * Value of black pieces threatened by white pieces
+     */
+    public int whitePotentialMaterialValue;      // effectively final
+    /**
+     * Value of white pieces threatened by black pieces
+     */
+    public int blackPotentialMaterialValue;      // effectively final
     public int whiteFieldPositionValue; // effectively final
     public int blackFieldPositionValue; // effectively final
     public int whiteMoveValue;
@@ -34,6 +43,8 @@ public class ChessboardBasis implements ChessConstants {
     public int numberOfWhiteMoves = 0;      // effectively final
     public int[] blackMoves = new int[184]; // effectively final
     public int numberOfBlackMoves = 0;      // effectively final
+    public boolean stalemate = false;
+    public boolean checkmate=false;
 
     private ChessboardBasis(boolean activePlayerIsWhite, int[][] board) {
         this.activePlayerIsWhite = activePlayerIsWhite;
@@ -97,8 +108,11 @@ public class ChessboardBasis implements ChessConstants {
         evaluateFieldPositionalValue();
         findLegalMovesIgnoringCheck();
         evaluateThreats();
-        whiteTotalValue = whiteMaterialValue * 10 + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
-        blackTotalValue = blackMaterialValue * 10 + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+//        whiteTotalValue = whiteMaterialValue*10 +  whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+//        blackTotalValue = blackMaterialValue*10 +  blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+        whiteTotalValue = whiteMaterialValue*10 + (whitePotentialMaterialValue>>2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+        blackTotalValue = blackMaterialValue*10 + (blackPotentialMaterialValue>>2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+        evaluatedPositions++;
     }
 
     public int getChessPiece(int row, int column) {
@@ -219,10 +233,47 @@ public class ChessboardBasis implements ChessConstants {
     private void evaluateThreats() {
         int whiteValue = 0;
         int blackValue = 0;
+        int whiteAdvantage = activePlayerIsWhite ? 1 : -1;
         for (int row = 0; row < 8; row++)
             for (int col = 0; col < 8; col++) {
                 whiteCoverageValue += canBeReachedByWhitePiece[row][col];
                 blackCoverageValue += canBeReachedByBlackPiece[row][col];
+                /*
+                int piece = board[row][col];
+                if (piece != 0) {
+                    if (piece < 0) {
+                        if (activePlayerIsWhite) piece = s_bauer;
+                        else piece = w_bauer;
+                    }
+                    if (isWhitePiece(piece)) {
+                        if (canBeReachedByBlackPiece[row][col] > 0) {
+                            if (canBeReachedByBlackPiece[row][col] > canBeReachedByWhitePiece[row][col] + whiteAdvantage) {
+                                // piece is very likely to be captured
+                                blackPotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 1;
+                            } else if (canBeReachedByBlackPiece[row][col] >= canBeReachedByWhitePiece[row][col] + whiteAdvantage) {
+                                // it's likely to became an equal exchange
+                                blackPotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 2;
+                            } else {
+                                // piece might get lost if something goes wrong
+                                blackPotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 3;
+                            }
+                        }
+                    } else {
+                        if (canBeReachedByWhitePiece[row][col] > 0) {
+                            if (canBeReachedByBlackPiece[row][col] < canBeReachedByWhitePiece[row][col] - whiteAdvantage) {
+                                // piece is very likely to be captured
+                                whitePotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 1;
+                            } else if (canBeReachedByBlackPiece[row][col] <= canBeReachedByWhitePiece[row][col] - whiteAdvantage) {
+                                // it's likely to became an equal exchange
+                                whitePotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 2;
+                            } else {
+                                // piece might get lost if something goes wrong
+                                whitePotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 3;
+                            }
+                        }
+                    }
+                }
+                    */
             }
     }
 

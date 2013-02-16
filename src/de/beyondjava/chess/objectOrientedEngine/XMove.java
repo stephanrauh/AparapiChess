@@ -13,6 +13,14 @@ public class XMove implements Comparable<XMove> {
     int move;
     public int whiteMaterialValue;
     public int blackMaterialValue;
+    /**
+     * Value of black pieces threatened by white pieces
+     */
+    public int whitePotentialMaterialValue;
+    /**
+     * Value of white pieces threatened by black pieces
+     */
+    public int blackPotentialMaterialValue;
     public int whiteFieldPositionValue;
     public int blackFieldPositionValue;
     public int whiteMoveValue;
@@ -49,6 +57,8 @@ public class XMove implements Comparable<XMove> {
     {
         String wm = String.format(" WM: %4d", whiteMaterialValue);
         String bm = String.format(" BM: %4d", blackMaterialValue);
+        String wpm = String.format(" WPM: %4d", whitePotentialMaterialValue);
+        String bpm = String.format(" BPM: %4d", blackPotentialMaterialValue);
         String wf = String.format(" WF: %4d", whiteFieldPositionValue);
         String bf = String.format(" BF: %4d", blackFieldPositionValue);
         String wmv = String.format(" WMv: %4d", whiteMoveValue);
@@ -63,7 +73,7 @@ public class XMove implements Comparable<XMove> {
             // black move
             total=String.format("T: %6d ", -whiteTotalValue+blackTotalValue);
         }
-        return total + wm + bm + wf + bf + wc + bc + wt + bt + getNotation();
+        return total + wm + wpm + bm + bpm + wf + bf + wc + bc + wt + bt + getNotation();
     }
 
 }

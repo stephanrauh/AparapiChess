@@ -1,4 +1,5 @@
 package de.beyondjava.chess.gui
+
 import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
 import de.beyondjava.chess.objectOrientedEngine.BlackIsCheckMateException
@@ -11,6 +12,7 @@ import javafx.event.EventHandler
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
 import javafx.util.Duration
+
 /**
  * This class tries to make sense out of the users mouse clicks.
  * User: SoyYo
@@ -42,6 +44,10 @@ class ChessMoveGUI {
     }
 
     public static Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+        if (board.checkmate || board.stalemate)
+        {
+            return board;
+        }
         int piece = board.getChessPiece(row, column)
 
         if (guiState.currentlyTouchedPieceX < 0 && guiState.currentlyTouchedPieceY < 0 && piece > 1) {
@@ -82,31 +88,30 @@ class ChessMoveGUI {
         KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 try {
-
-                Move move = board.findBestMove();
+                    Move move = board.findBestMove();
 //                if ((!board.stalemate) && (!board.checkmate)) {
-                if (null != move) {
-                    addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
-                    board = board.moveChessPiece(move)
-                    ChessGUIRemoteControl.chessboard = board
-                    history += board
-                    whiteMoveHistory += whiteMoves.text
-                    blackMoveHistory += blackMoves.text
-                } else
-                    checkmate.text = "(error)"
+                    if (null != move) {
+                        addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
+                        board = board.moveChessPiece(move)
+                        ChessGUIRemoteControl.chessboard = board
+                        history += board
+                        whiteMoveHistory += whiteMoves.text
+                        blackMoveHistory += blackMoves.text
+                    } else
+                        checkmate.text = "(error)"
 //                }
                 }
-                catch (WhiteIsCheckMateException p_win)
-                {
+                catch (WhiteIsCheckMateException p_win) {
                     checkmate.text = "Checkmate!\nBlack wins!"
+                    board.checkmate=true
                 }
-                catch (BlackIsCheckMateException p_win)
-                {
+                catch (BlackIsCheckMateException p_win) {
                     checkmate.text = "Checkmate!\nWhite wins!"
+                    board.checkmate=true
                 }
-                catch (EndOfGameException)
-                {
-                    checkmate.text="Stalemate!"
+                catch (EndOfGameException) {
+                    checkmate.text = "Stalemate!"
+                    board.stalemate=true
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
             }
@@ -147,11 +152,11 @@ class ChessMoveGUI {
                                 fields[row][column].setImage(images.getImage(board.getChessPiece(row, column), row, column))
                             }
                 }
-//        if (board.isStalemate()) {
+        if (board.stalemate) {
 //            checkmate.text = "Stalemate!"
-//        } else if (board.isCheckmate()) {
-//            checkmate.text = "Stalemate!"
-//        } else
+        } else if (board.checkmate) {
+//            checkmate.text = "Checkmate!"
+        } else
         if (board.activePlayerIsWhite) {
             checkmate.text = "white move"
         } else {
@@ -161,16 +166,14 @@ class ChessMoveGUI {
 
     public static Chessboard lastMove(Chessboard board, Text whiteMoves, Text blackMoves) {
         if (history.size() > 0) {
-             Chessboard last = history[-2]
+            Chessboard last = history[-2]
             history = history[0..-2]
             if (whiteMoveHistory.size() > 1) {
                 whiteMoveHistory = whiteMoveHistory[0..-2]
                 whiteMoves.text = whiteMoveHistory[-1]
-            }
-            else
-            {
-                whiteMoveHistory=[]
-                whiteMoves.text=""
+            } else {
+                whiteMoveHistory = []
+                whiteMoves.text = ""
             }
             if (blackMoveHistory.size() > 1) {
                 blackMoveHistory = blackMoveHistory[0..-2]
