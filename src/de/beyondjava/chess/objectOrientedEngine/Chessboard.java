@@ -23,7 +23,7 @@ public class Chessboard extends MoveGenerator {
     }
 
 
-    public Chessboard(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
-        super(oldBoard, fromRow, fromColumn, toRow, toColumn);
+    public Chessboard(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
+        super(oldBoard, fromRow, fromColumn, toRow, toColumn, promotedPiece);
     }
 }

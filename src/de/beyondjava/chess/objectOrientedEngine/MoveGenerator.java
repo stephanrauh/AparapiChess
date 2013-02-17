@@ -26,8 +26,8 @@ public class MoveGenerator extends ChessboardBasis {
     }
 
 
-    public MoveGenerator(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn) {
-        super(oldBoard, fromRow, fromColumn, toRow, toColumn);
+    public MoveGenerator(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
+        super(oldBoard, fromRow, fromColumn, toRow, toColumn, promotedPiece);
     }
 
     public Move findBestMove() throws EndOfGameException {
@@ -179,7 +179,8 @@ public class MoveGenerator extends ChessboardBasis {
             int fromColumn = (whiteMove >> 8) & 0x000F;
             int toRow = (whiteMove >> 4) & 0x000F;
             int toColumn = whiteMove & 0x000F;
-            Chessboard afterWhiteMove = e.boardAfterMove.moveChessPiece(fromRow, fromColumn, toRow, toColumn);
+            int promotedPiece = (whiteMove >> 16) & 0x00FF;
+            Chessboard afterWhiteMove = e.boardAfterMove.moveChessPiece(fromRow, fromColumn, toRow, toColumn, promotedPiece);
             e.whiteMaterialValue = afterWhiteMove.whiteMaterialValue;
             e.blackMaterialValue = afterWhiteMove.blackMaterialValue;
             e.whitePotentialMaterialValue = afterWhiteMove.whitePotentialMaterialValue;
@@ -210,7 +211,7 @@ public class MoveGenerator extends ChessboardBasis {
             int fromColumn = (move >> 8) & 0x000F;
             int toRow = (move >> 4) & 0x000F;
             int toColumn = move & 0x000F;
-            Chessboard afterMove = new Chessboard(this, fromRow, fromColumn, toRow, toColumn);
+            Chessboard afterMove = new Chessboard(this, fromRow, fromColumn, toRow, toColumn, promotion);
             XMove e = new XMove();
             e.move = move;
             e.piece = getChessPiece(fromRow, fromColumn);

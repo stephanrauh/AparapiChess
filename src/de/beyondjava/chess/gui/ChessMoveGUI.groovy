@@ -66,7 +66,7 @@ class ChessMoveGUI {
         if (board.isMovePossible(fromRow, fromColumn, toRow, toColumn)) {
             fields[fromRow][fromColumn].opacity = 1.0
             addMoveNotation(board, toRow, toColumn, fromRow, fromColumn, whiteMoves, blackMoves)
-            board = board.moveChessPiece(fromRow, fromColumn, toRow, toColumn)
+            board = board.moveChessPiece(fromRow, fromColumn, toRow, toColumn, board.activePlayerIsWhite?ChessConstants.w_dame:ChessConstants.s_dame)
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
             redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
