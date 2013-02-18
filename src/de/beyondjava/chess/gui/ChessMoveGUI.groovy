@@ -93,7 +93,7 @@ class ChessMoveGUI {
                     if (null != move) {
                         addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
                         board = board.moveChessPiece(move)
-                        ChessGUIRemoteControl.chessboard = board
+                        ChessUIComponents.chessboard = board
                         history += board
                         whiteMoveHistory += whiteMoves.text
                         blackMoveHistory += blackMoves.text
