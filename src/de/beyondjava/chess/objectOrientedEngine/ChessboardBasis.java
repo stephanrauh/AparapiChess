@@ -681,7 +681,7 @@ public class ChessboardBasis implements ChessConstants {
                     if (b.activePlayerIsWhite) {
                         b.findBestWhiteMoves(0, 1);
                     } else {
-                        b.findBestBlackMoves(0, 1);
+                        b.findBestBlackMoves(0, 1, false);
                     }
                     return true;
                 } catch (CheckMateException p_impossibleMove) {
