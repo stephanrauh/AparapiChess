@@ -4,6 +4,7 @@ import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
 import de.beyondjava.chess.objectOrientedEngine.BlackIsCheckMateException
 import de.beyondjava.chess.objectOrientedEngine.Chessboard
+import de.beyondjava.chess.objectOrientedEngine.EndOfGameException
 import de.beyondjava.chess.objectOrientedEngine.WhiteIsCheckMateException
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
@@ -32,12 +33,12 @@ class ChessMoveGUI {
             guiState.currentlyTouchedPieceY = row
             guiState.currentlyTouchedPieceX = column
         } else {
-            checkmate.text = "opponent's piece"
+            checkmate.text = "\nopponent's piece"
         }
     }
 
     public static void jadoube(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
-        checkmate.text = "J'a doube"
+        checkmate.text = "\nJ'a doube!"
         fields[row][column].opacity = 1.0
         guiState.currentlyTouchedPieceY = -1
         guiState.currentlyTouchedPieceX = -1
@@ -57,7 +58,7 @@ class ChessMoveGUI {
         } else if (guiState.currentlyTouchedPieceX >= 0 && guiState.currentlyTouchedPieceY >= 0) {
             board = move(guiState.currentlyTouchedPieceY, guiState.currentlyTouchedPieceX, row, column, fields, board, guiState, images, checkmate, whiteMoves, blackMoves);
         } else {
-            checkmate.text = "Can't figure out what you want"
+            checkmate.text = "\nCan't figure out what you want"
         }
         return board;
     }
@@ -77,7 +78,7 @@ class ChessMoveGUI {
 //            def move = generator.findBestMove()
             board = opponentsMove(board, whiteMoves, blackMoves, checkmate, fields, images)
         } else {
-            checkmate.text = "illegal move"
+            checkmate.text = "\nillegal move"
         }
         return board;
     }
@@ -102,15 +103,17 @@ class ChessMoveGUI {
 //                }
                 }
                 catch (WhiteIsCheckMateException p_win) {
+                    blackMoves.text=blackMoves.text.trim()+"+";
                     checkmate.text = "Checkmate!\nBlack wins!"
                     board.checkmate=true
                 }
                 catch (BlackIsCheckMateException p_win) {
+                    whiteMoves.text=whiteMoves.text.trim()+"+";
                     checkmate.text = "Checkmate!\nWhite wins!"
                     board.checkmate=true
                 }
-                catch (EndOfGameException) {
-                    checkmate.text = "Stalemate!"
+                catch (EndOfGameException p_remis) {
+                    checkmate.text = "\nStalemate!"
                     board.stalemate=true
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
@@ -125,7 +128,7 @@ class ChessMoveGUI {
 
     private static void addMoveNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
         String text = getNotation(board, toRow, toColumn, fromRow, fromColumn)
-        if (board.activePlayerIsWhite) whiteMoves.text += text + "\n" else blackMoves.text += text + "\n"
+        if (board.activePlayerIsWhite) whiteMoves.text += "${board.moveCount}.$text\n" else blackMoves.text += "$text\n"
     }
 
     private static String getNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
@@ -158,9 +161,9 @@ class ChessMoveGUI {
 //            checkmate.text = "Checkmate!"
         } else
         if (board.activePlayerIsWhite) {
-            checkmate.text = "white move"
+            checkmate.text = "\nwhite move"
         } else {
-            checkmate.text = "black move"
+            checkmate.text = "\nblack move"
         }
     }
 

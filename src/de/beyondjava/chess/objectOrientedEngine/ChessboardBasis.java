@@ -14,7 +14,9 @@ import java.util.List;
  * Time: 19:17
  */
 public class ChessboardBasis implements ChessConstants {
-    public static int evaluatedPositions = 0;
+    public int moveCount=0;
+    public static int evaluatedPositions = 0; // DEBUG
+    public static long totalTime = 0; // DEBUG
     public final int[][] board;
     public final boolean activePlayerIsWhite;
     public byte[][] canBeReachedByWhitePiece = new byte[8][8];
@@ -49,6 +51,10 @@ public class ChessboardBasis implements ChessConstants {
     private ChessboardBasis(boolean activePlayerIsWhite, int[][] board) {
         this.activePlayerIsWhite = activePlayerIsWhite;
         this.board = board;
+        if (activePlayerIsWhite)
+        {
+            moveCount++;
+        }
         evaluateBoard();
     }
 
@@ -73,13 +79,13 @@ public class ChessboardBasis implements ChessConstants {
         for (int row = 0; row < 8; row++) {
             newBoard[row] = new int[8];
             for (int y = 0; y < 8; y++) {
-                int piece = oldBoard.board[row][y];
+                int piece = oldBoard.getChessPiece(row,y);
                 if (piece < 0) piece = 0; // forget that en passant once was possible
                 newBoard[row][y] = piece;
             }
         }
 
-        if (oldBoard.board[toRow][toColumn] == -1) {
+        if (oldBoard.getChessPiece(toRow,toColumn) == -1) {
             // capture en passant
             newBoard[fromRow][toColumn] = 0;
         }
@@ -132,6 +138,7 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     private void evaluateBoard() {
+        long timer = System.nanoTime();
         evaluateMaterialValue();
         evaluateFieldPositionalValue();
         findLegalMovesIgnoringCheck();
@@ -141,6 +148,8 @@ public class ChessboardBasis implements ChessConstants {
         whiteTotalValue = whiteMaterialValue * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
         blackTotalValue = blackMaterialValue * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
         evaluatedPositions++;
+        long dauer = System.nanoTime() - timer;
+        totalTime += dauer;
     }
 
     public int getChessPiece(int row, int column) {
@@ -181,23 +190,23 @@ public class ChessboardBasis implements ChessConstants {
 
     protected boolean isEmptyField(int row, int column) {
         if (!isInsideBoard(row, column)) return false;
-        if (board[row][column] <= 0) return true;
+        if (getChessPiece(row, column) <= 0) return true;
         return false;
     }
 
     protected boolean isOpponentsPiece(int row, int column, boolean p_activePlayerIsWhite) {
         if (!isInsideBoard(row, column)) return false;
-        if (board[row][column] <= 0) return false;
+        if (getChessPiece(row, column) <= 0) return false;
         if (p_activePlayerIsWhite) {
-            return (isBlackPiece(board[row][column]));
+            return (isBlackPiece(getChessPiece(row, column)));
         } else {
-            return (isWhitePiece(board[row][column]));
+            return (isWhitePiece(getChessPiece(row, column)));
         }
     }
 
     protected boolean isEmptyOrCanBeCaptured(int row, int column, boolean p_activePlayerIsWhite) {
         if (!isInsideBoard(row, column)) return false;
-        int piece = board[row][column];
+        int piece = getChessPiece(row, column);
         if (piece <= 0) return true;
         if (p_activePlayerIsWhite) {
             return (isBlackPiece(piece));
@@ -211,7 +220,7 @@ public class ChessboardBasis implements ChessConstants {
         int blackValue = 0;
         for (int fromRow = 0; fromRow < 8; fromRow++)
             for (int toColumn = 0; toColumn < 8; toColumn++) {
-                int piece = board[fromRow][toColumn];
+                int piece = getChessPiece(fromRow, toColumn);
                 if (isWhitePiece(piece)) {
                     whiteValue += s_MATERIAL_VALUE[piece];
                 }
@@ -243,7 +252,7 @@ public class ChessboardBasis implements ChessConstants {
         int blackValue = 0;
         for (int row = 0; row < 8; row++)
             for (int col = 0; col < 8; col++) {
-                int piece = board[row][col];
+                int piece = getChessPiece(row,col);
                 if (piece == w_bauer) {
                     whiteValue += whitePawnPositions[row][col];
                 } else if (piece == s_bauer) {
@@ -264,8 +273,8 @@ public class ChessboardBasis implements ChessConstants {
         int whiteAdvantage = activePlayerIsWhite ? 1 : -1;
         for (int row = 0; row < 8; row++)
             for (int col = 0; col < 8; col++) {
-                whiteCoverageValue += canBeReachedByWhitePiece[row][col];
-                blackCoverageValue += canBeReachedByBlackPiece[row][col];
+                whiteCoverageValue += whitePieceReach(row,col);
+                blackCoverageValue += blackPieceReach(row,col);
                 /*
                 int piece = board[row][col];
                 if (piece != 0) {
@@ -308,7 +317,7 @@ public class ChessboardBasis implements ChessConstants {
     public void findLegalMovesIgnoringCheck() {
         for (int fromRow = 0; fromRow < 8; fromRow++)
             for (int fromColumn = 0; fromColumn < 8; fromColumn++) {
-                int piece = board[fromRow][fromColumn];
+                int piece = getChessPiece(fromRow,fromColumn);
                 if (piece >= 2) {
                     boolean pieceIsWhite = isWhitePiece(piece);
                     switch ((piece + 2) >> 2) {
@@ -392,7 +401,7 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     private boolean canBeCapturedEnPassant(int nr, int nc) {
-        return isInsideBoard(nr, nc) && (board[nr][nc] == -1);
+        return isInsideBoard(nr, nc) && (getChessPiece(nr,nc) == -1);
     }
 
     private void getLegalMovesForAQueen(int row, int column, boolean pieceIsWhite) {
@@ -587,12 +596,12 @@ public class ChessboardBasis implements ChessConstants {
                 if (isEmptyField(nr, 5) && isEmptyField(nr, 6)) {
                     int piece = getChessPiece(nr, 7);
                     if (piece == s_turm && (!pieceIsWhite)) {
-                        if (canBeReachedByWhitePiece[nr][4] == 0 && canBeReachedByWhitePiece[nr][5] == 0 && canBeReachedByWhitePiece[nr][6] == 0) {
+                        if (canBeReachedByWhitePiece(nr,4) == false && canBeReachedByWhitePiece(nr,5) == false && canBeReachedByWhitePiece(nr,6) == false) {
                             addPossibleMove(row, column, row, column + 2, pieceIsWhite);
                         }
                     }
                     if (piece == w_turm && (pieceIsWhite)) {
-                        if (canBeReachedByBlackPiece[nr][4] == 0 && canBeReachedByBlackPiece[nr][5] == 0 && canBeReachedByBlackPiece[nr][6] == 0) {
+                        if (canBeReachedByBlackPiece(nr,4) == false && canBeReachedByBlackPiece(nr,5) == false && canBeReachedByBlackPiece(nr,6) == false) {
                             addPossibleMove(row, column, row, column + 2, pieceIsWhite);
                         }
                     }
@@ -606,12 +615,12 @@ public class ChessboardBasis implements ChessConstants {
                 if (isEmptyField(nr, 3) && isEmptyField(nr, 2) && isEmptyField(nr, 1)) {
                     int piece = getChessPiece(nr, 0);
                     if (piece == s_turm && (!pieceIsWhite)) {
-                        if (canBeReachedByWhitePiece[nr][4] == 0 && canBeReachedByWhitePiece[nr][3] == 0 && canBeReachedByWhitePiece[nr][2] == 0) {
+                        if (canBeReachedByWhitePiece(nr,4) == false && canBeReachedByWhitePiece(nr,3) == false && canBeReachedByWhitePiece(nr,2)==false) {
                             addPossibleMove(row, column, row, column - 2, pieceIsWhite);
                         }
                     }
                     if (piece == w_turm && (pieceIsWhite)) {
-                        if (canBeReachedByBlackPiece[nr][4] == 0 && canBeReachedByBlackPiece[nr][3] == 0 && canBeReachedByBlackPiece[nr][2] == 0) {
+                        if (canBeReachedByBlackPiece(nr,4) == false && canBeReachedByBlackPiece(nr,3) == false && canBeReachedByBlackPiece(nr,2)==false) {
                             addPossibleMove(row, column, row, column - 2, pieceIsWhite);
                         }
                     }
@@ -642,7 +651,7 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     private void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite, int promotedPiece) {
-        int capturedPiece = board[toRow][toColumn];
+        int capturedPiece = getChessPiece(toRow,toColumn);
         if (capturedPiece < 0) {
             capturedPiece = pieceIsWhite ? s_bauer : w_bauer;
         } else if (capturedPiece == w_koenig) {
@@ -653,12 +662,37 @@ public class ChessboardBasis implements ChessConstants {
         int m = move(fromRow, fromColumn, toRow, toColumn, capturedPiece, promotedPiece);
         if (pieceIsWhite) {
             whiteMoves[numberOfWhiteMoves++] = m;
-            canBeReachedByWhitePiece[toRow][toColumn]++;
         } else {
             blackMoves[numberOfBlackMoves++] = m;
-            canBeReachedByBlackPiece[toRow][toColumn]++;
+        }
+        addFieldToPieceReach(toRow, toColumn, getChessPiece(fromRow, fromColumn), pieceIsWhite);
+    }
+
+    private void addFieldToPieceReach(int row, int column, int piece, boolean pieceIsWhite)
+    {
+        if (pieceIsWhite) {
+            canBeReachedByWhitePiece[row][column]++;
+        } else {
+            canBeReachedByBlackPiece[row][column]++;
         }
     }
+    private boolean canBeReachedByWhitePiece(int row, int column)
+    {
+        return whitePieceReach(row, column)>0;
+    }
+    private boolean canBeReachedByBlackPiece(int row, int column)
+    {
+        return blackPieceReach(row, column)>0;
+    }
+    private int whitePieceReach(int row, int column)
+    {
+        return canBeReachedByWhitePiece[row][column];
+    }
+    private int blackPieceReach(int row, int column)
+    {
+        return canBeReachedByBlackPiece[row][column];
+    }
+
 
     public int move(int fromRow, int fromColumn, int toRow, int toColumn, int capturedPiece, int promotedPiece) {
         int capturedValue = s_MATERIAL_VALUE[capturedPiece];
@@ -679,13 +713,15 @@ public class ChessboardBasis implements ChessConstants {
                 Chessboard b = moveChessPiece(new Move(0, fromRow, fromColumn, toRow, toColumn, 0, false, false, 0));
                 try {
                     if (b.activePlayerIsWhite) {
-                        b.findBestWhiteMoves(0, 1);
+                        b.findBestWhiteMoves(0, 1, false);
                     } else {
                         b.findBestBlackMoves(0, 1, false);
                     }
                     return true;
-                } catch (CheckMateException p_impossibleMove) {
-                    return false;
+                } catch (WhiteIsCheckMateException p_impossibleMove) {
+                    return !activePlayerIsWhite;
+                } catch (BlackIsCheckMateException p_impossibleMove) {
+                    return activePlayerIsWhite;
                 } catch (EndOfGameException e) {
                     return true;
                 }
