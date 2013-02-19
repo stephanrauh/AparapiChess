@@ -538,24 +538,28 @@ public class ChessboardBasis implements ChessConstants {
         nc = column;
         nr++;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nr--;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nc++;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
         nc = column;
         nc--;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
@@ -563,6 +567,7 @@ public class ChessboardBasis implements ChessConstants {
         nr++;
         nc++;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
@@ -570,6 +575,7 @@ public class ChessboardBasis implements ChessConstants {
         nr--;
         nc++;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
@@ -577,6 +583,7 @@ public class ChessboardBasis implements ChessConstants {
         nr++;
         nc--;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         nr = row;
@@ -584,6 +591,7 @@ public class ChessboardBasis implements ChessConstants {
         nr--;
         nc--;
         if (isEmptyOrCanBeCaptured(nr, nc, pieceIsWhite)) {
+            if (!canBeReachedByOpponentsPiece(row, column, pieceIsWhite))
             addPossibleMove(row, column, nr, nc, pieceIsWhite);
         }
         // castling to the right hand side
@@ -688,7 +696,14 @@ public class ChessboardBasis implements ChessConstants {
     {
         return canBeReachedByWhitePiece[row][column];
     }
-    private int blackPieceReach(int row, int column)
+    private boolean canBeReachedByOpponentsPiece(int row, int column, boolean pieceIsWhite)
+    {
+        if (pieceIsWhite)
+            return canBeReachedByBlackPiece(row, column);
+        else
+            return canBeReachedByWhitePiece(row, column);
+    }
+        private int blackPieceReach(int row, int column)
     {
         return canBeReachedByBlackPiece[row][column];
     }

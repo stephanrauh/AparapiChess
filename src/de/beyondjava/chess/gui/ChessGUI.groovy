@@ -52,7 +52,7 @@ uiElements.with {
                 }
                 whiteMoves = text(layoutX: 856, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
                 blackMoves = text(layoutX: 970, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
-                checkmate = text(layoutX: 856, layoutY: 820, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)
+                checkmate = text(layoutX: 856, layoutY: 816, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)
 
                 text(layoutX: 0, layoutY: 896, font: '10pt sanserif', text: 'Legal notes:', fill: Color.BLACK)
                 text(layoutX: 0, layoutY: 908, font: '10pt sanserif',
