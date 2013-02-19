@@ -4,26 +4,26 @@ import javafx.scene.paint.Color
 
 import static groovyx.javafx.GroovyFX.start
 
-ChessUIComponents uiElements = new ChessUIComponents()
+ChessMoveGUI uiElements = new ChessMoveGUI()
 uiElements.with {
     start {
         stage(title: 'Beyond Java Chess GUI using GroovyFX', show: true) {
-            scene {
+            chessScene = scene {
                 rectangle(width: 1100, height: 880, fill: BLACK)
                 rectangle(x: 20, y: 60, width: 800, height: 800, fill: Color.SANDYBROWN)
                 rectangle(x: 60, y: 100, width: 720, height: 720, fill: Color.BLACK)
 
                 toolBar {
-                    button(text: "flip board", onAction: { chessboard = ChessMoveGUI.opponentsMove(chessboard, whiteMoves, blackMoves, checkmate, fields, images) })
-                    button(text: "new game", onAction: { chessboard = new Chessboard(); ChessMoveGUI.redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
-                    button(text: "back", onAction: { chessboard = ChessMoveGUI.lastMove(chessboard, whiteMoves, blackMoves); ChessMoveGUI.redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
+                    button(text: "flip board", onAction: { chessboard = opponentsMove(chessboard, whiteMoves, blackMoves, checkmate, fields, images) })
+                    button(text: "new game", onAction: { chessboard = new Chessboard(); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
+                    button(text: "back", onAction: { chessboard = lastMove(chessboard, whiteMoves, blackMoves); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
                 }
 
                 group {
                     8.times { int column ->
                         8.times { int row ->
                             fields[row][column] = imageView(x: 60 + 90 * column, y: 100 + 90 * row,
-                                    onMouseClicked: { chessboard = ChessMoveGUI.onClick(row, column, fields, chessboard, state, images, checkmate, whiteMoves, blackMoves) })
+                                    onMouseClicked: { chessboard = onClick(row, column, fields, chessboard, state, images, checkmate, whiteMoves, blackMoves) })
                         }
                     }
                     8.times {
@@ -62,7 +62,7 @@ uiElements.with {
 
             }
         }
-        ChessMoveGUI.redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves)
+        redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves)
         update()
     }
 }

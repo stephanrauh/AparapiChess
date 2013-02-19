@@ -1,6 +1,6 @@
 package de.beyondjava.chess.test
 
-import de.beyondjava.chess.gui.ChessUIComponents
+import de.beyondjava.chess.gui.ChessMoveGUI
 import de.beyondjava.chess.objectOrientedEngine.Chessboard
 import de.beyondjava.chess.common.Move
 import de.beyondjava.chess.common.Piece
@@ -45,7 +45,7 @@ class MoveGeneratorPawnTests extends GroovyTestCase {
         assertEquals("E4xD5", m.getNotation())
         b = b.findBestMove();
         assertEquals(0, b.evalMaterialPositionFromWhitePointOfView())
-        new ChessUIComponents().draw(b)
+        new ChessMoveGUI().draw(b)
     }
 
 }

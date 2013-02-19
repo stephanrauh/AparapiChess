@@ -10,6 +10,8 @@ import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
+import javafx.scene.Cursor
+import javafx.scene.Scene
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
 import javafx.util.Duration
@@ -22,11 +24,46 @@ import javafx.util.Duration
  * To change this template use File | Settings | File Templates.
  */
 class ChessMoveGUI {
-    static List<Chessboard> history = [new Chessboard()]
-    static List<String> whiteMoveHistory = []
-    static List<String> blackMoveHistory = []
+    def columnNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    def rowNames = ['8', '7', '6', '5', '4', '3', '2', '1']
 
-    public static void initiateTouch(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
+    ChessImages images=new ChessImages()
+    ImageView[][] fields = new ImageView[8][8];
+    ChessGUIState state = new ChessGUIState();
+    Text checkmate = null
+    Text whiteMoves = null
+    Text blackMoves = null
+    Scene chessScene;
+
+    static Chessboard chessboard = new Chessboard()
+    static List<Move> showMoves = null;
+
+    public void draw(Chessboard c)
+    {
+        chessboard=c;
+        new ChessGUI().run()
+    }
+    public  void draw(Chessboard c, List<Move> moves)
+    {
+        chessboard=c;
+        showMoves=moves;
+        new ChessGUI().run()
+    }
+
+    public static void update()
+    {
+        if (showMoves!=null)
+        {
+            double op = 0.8
+            showMoves.each{Move m -> fields[m.toRow][m.toColumn].opacity=op; op -= 0.1}
+        }
+    }
+
+     List<Chessboard> history = [new Chessboard()]
+     List<String> whiteMoveHistory = []
+     List<String> blackMoveHistory = []
+
+    public  void initiateTouch(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
         int piece = board.getChessPiece(row, column)
         if (board.isActivePlayersPiece(piece)) {
             fields[row][column].opacity = 0.7
@@ -37,14 +74,14 @@ class ChessMoveGUI {
         }
     }
 
-    public static void jadoube(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
+    public  void jadoube(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
         checkmate.text = "\nJ'a doube!"
         fields[row][column].opacity = 1.0
         guiState.currentlyTouchedPieceY = -1
         guiState.currentlyTouchedPieceX = -1
     }
 
-    public static Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public  Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         if (board.checkmate || board.stalemate)
         {
             return board;
@@ -63,7 +100,7 @@ class ChessMoveGUI {
         return board;
     }
 
-    public static Chessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public Chessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         if (board.isMovePossible(fromRow, fromColumn, toRow, toColumn)) {
             fields[fromRow][fromColumn].opacity = 1.0
             addMoveNotation(board, toRow, toColumn, fromRow, fromColumn, whiteMoves, blackMoves)
@@ -83,18 +120,27 @@ class ChessMoveGUI {
         return board;
     }
 
-    private static Chessboard opponentsMove(Chessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
+    private Chessboard opponentsMove(Chessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
+        chessScene.setCursor(Cursor.WAIT)
+        if (board.activePlayerIsWhite)
+        {
+            checkmate.text="\nwhite's thinking..."
+        }
+        else
+        {
+            checkmate.text="\nblack's thinking..."
+        }
         Timeline time = new Timeline();
         time.setCycleCount(1);
         KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 try {
-                    Move move = board.findBestMove();
+                    Move move = board.findBestMove()
 //                if ((!board.stalemate) && (!board.checkmate)) {
                     if (null != move) {
                         addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
                         board = board.moveChessPiece(move)
-                        ChessUIComponents.chessboard = board
+                        chessboard = board
                         history += board
                         whiteMoveHistory += whiteMoves.text
                         blackMoveHistory += blackMoves.text
@@ -117,6 +163,7 @@ class ChessMoveGUI {
                     board.stalemate=true
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
+                chessScene.setCursor(Cursor.HAND)
             }
         });
 
@@ -126,12 +173,12 @@ class ChessMoveGUI {
 
     }
 
-    private static void addMoveNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
+    private void addMoveNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
         String text = getNotation(board, toRow, toColumn, fromRow, fromColumn)
         if (board.activePlayerIsWhite) whiteMoves.text += "${board.moveCount}.$text\n" else blackMoves.text += "$text\n"
     }
 
-    private static String getNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
+    private String getNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
         int capturedPiece = board.getChessPiece(toRow, toColumn)
         if (capturedPiece == -1) {
             if (board.activePlayerIsWhite) {
@@ -147,7 +194,7 @@ class ChessMoveGUI {
         return m.getNotation()
     }
 
-    public static void redraw(ImageView[][] fields, Chessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public void redraw(ImageView[][] fields, Chessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         8.times
                 { int row ->
                     8.times
@@ -167,7 +214,7 @@ class ChessMoveGUI {
         }
     }
 
-    public static Chessboard lastMove(Chessboard board, Text whiteMoves, Text blackMoves) {
+    public Chessboard lastMove(Chessboard board, Text whiteMoves, Text blackMoves) {
         if (history.size() > 0) {
             Chessboard last = history[-2]
             history = history[0..-2]
