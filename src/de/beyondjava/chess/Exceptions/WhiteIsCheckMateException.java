@@ -1,4 +1,4 @@
-package de.beyondjava.chess.objectOrientedEngine;
+package de.beyondjava.chess.Exceptions;
 
 /**
  * Thrown if a king can be captured.

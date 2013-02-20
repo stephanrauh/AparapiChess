@@ -1,38 +1,42 @@
-package de.beyondjava.chess.objectOrientedEngine;
+package de.beyondjava.chess.linearEngine;
 
+import de.beyondjava.chess.Exceptions.*;
 import de.beyondjava.chess.common.Move;
-import de.beyondjava.chess.common.Piece;
 
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.*;
 
-public class MoveGenerator extends ChessboardBasis {
-    public MoveGenerator() {
+public class LinearChessboard extends LinearChessboardBasis {
+    public LinearChessboard() {
         super();
     }
 
-    public MoveGenerator(boolean activePlayerIsWhite, ChessboardBasis board) {
+    public LinearChessboard(boolean activePlayerIsWhite, LinearChessboardBasis board) {
         super(activePlayerIsWhite, board);
     }
 
-    public MoveGenerator(boolean activePlayerIsWhite, Piece... pieces) {
-        super(activePlayerIsWhite, pieces);
-    }
+//    public LinearChessboard(boolean activePlayerIsWhite, Piece... pieces) {
+//        super(activePlayerIsWhite, pieces);
+//    }
 
 
-    public MoveGenerator(ChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
+    public LinearChessboard(LinearChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
         super(oldBoard, fromRow, fromColumn, toRow, toColumn, promotedPiece);
     }
 
     public Move findBestMove() throws EndOfGameException {
-        Chessboard.evaluatedPositions = 0;
-        Chessboard.totalTime = 0;
+        LinearChessboard.evaluatedPositions = 0;
+        LinearChessboard.totalTime = 0;
+        LinearChessboard.totalTimeGetNewBoard = 0;
+
         long start = System.nanoTime();
-        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(4, 9, true) : findBestBlackMoves(4, 9, false);
+        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(4, 9, true) : findBestBlackMoves(4, 9, true);
         long dauer = System.nanoTime() - start;
-        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + Chessboard.evaluatedPositions);
-        System.out.println("evaluation took  " + ((Chessboard.totalTime/1000)/1000) + " ms");
-        System.out.println("Average evaluation: " + Chessboard.totalTime/evaluatedPositions + " ns") ;
+        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + NumberFormat.getInstance().format( LinearChessboard.evaluatedPositions));
+        System.out.println("evaluation took  " + ((LinearChessboard.totalTime/1000)/1000) + " ms");
+        System.out.println("copying boards took  " + ((LinearChessboard.totalTimeGetNewBoard/1000)/1000) + " ms");
+        System.out.println("Average evaluation: " + LinearChessboard.totalTime/evaluatedPositions + " ns") ;
         int move = bestMoves[0];
         int fromRow = (move >> 12) & 0x000F;
         int fromColumn = (move >> 8) & 0x000F;
@@ -361,7 +365,7 @@ public class MoveGenerator extends ChessboardBasis {
             int toRow = (whiteMove >> 4) & 0x000F;
             int toColumn = whiteMove & 0x000F;
             int promotedPiece = (whiteMove >> 16) & 0x00FF;
-            Chessboard afterWhiteMove = e.boardAfterMove.moveChessPiece(fromRow, fromColumn, toRow, toColumn, promotedPiece);
+            LinearChessboard afterWhiteMove = e.boardAfterMove.moveChessPiece(fromRow, fromColumn, toRow, toColumn, promotedPiece);
             e.whiteMaterialValue = afterWhiteMove.whiteMaterialValue;
             e.blackMaterialValue = afterWhiteMove.blackMaterialValue;
             e.whitePotentialMaterialValue = afterWhiteMove.whitePotentialMaterialValue;
@@ -392,7 +396,7 @@ public class MoveGenerator extends ChessboardBasis {
             int fromColumn = (move >> 8) & 0x000F;
             int toRow = (move >> 4) & 0x000F;
             int toColumn = move & 0x000F;
-            Chessboard afterMove = new Chessboard(this, fromRow, fromColumn, toRow, toColumn, promotion);
+            LinearChessboard afterMove = new LinearChessboard(this, fromRow, fromColumn, toRow, toColumn, promotion);
             XMove e = new XMove();
             e.move = move;
             e.piece = getChessPiece(fromRow, fromColumn);

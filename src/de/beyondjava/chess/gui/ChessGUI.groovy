@@ -1,5 +1,6 @@
 package de.beyondjava.chess.gui
-import de.beyondjava.chess.objectOrientedEngine.Chessboard
+
+import de.beyondjava.chess.linearEngine.LinearChessboard
 import javafx.scene.paint.Color
 
 import static groovyx.javafx.GroovyFX.start
@@ -15,7 +16,7 @@ uiElements.with {
 
                 toolBar {
                     button(text: "flip board", onAction: { chessboard = opponentsMove(chessboard, whiteMoves, blackMoves, checkmate, fields, images) })
-                    button(text: "new game", onAction: { chessboard = new Chessboard(); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
+                    button(text: "new game", onAction: { chessboard = new LinearChessboard(); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
                     button(text: "back", onAction: { chessboard = lastMove(chessboard, whiteMoves, blackMoves); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
                 }
 

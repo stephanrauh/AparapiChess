@@ -1,14 +1,7 @@
-package de.beyondjava.chess.objectOrientedEngine;
+package de.beyondjava.chess.linearEngine;
 
 import de.beyondjava.chess.common.Move;
 
-/**
- * Created with IntelliJ IDEA.
- * User: SoyYo
- * Date: 14.02.13
- * Time: 21:24
- * To change this template use File | Settings | File Templates.
- */
 public class XMove implements Comparable<XMove> {
     public int move;
     public int whiteMaterialValue;
@@ -34,7 +27,7 @@ public class XMove implements Comparable<XMove> {
     public int numberOfWhiteMoves;
     public int numberOfBlackMoves ;
     public int piece;
-    public Chessboard boardAfterMove;
+    public LinearChessboard boardAfterMove;
     public boolean stalemate;
     public boolean checkmate;
 

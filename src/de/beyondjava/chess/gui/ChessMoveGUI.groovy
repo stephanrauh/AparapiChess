@@ -1,11 +1,11 @@
 package de.beyondjava.chess.gui
 
+import de.beyondjava.chess.Exceptions.BlackIsCheckMateException
+import de.beyondjava.chess.Exceptions.EndOfGameException
+import de.beyondjava.chess.Exceptions.WhiteIsCheckMateException
 import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
-import de.beyondjava.chess.objectOrientedEngine.BlackIsCheckMateException
-import de.beyondjava.chess.objectOrientedEngine.Chessboard
-import de.beyondjava.chess.objectOrientedEngine.EndOfGameException
-import de.beyondjava.chess.objectOrientedEngine.WhiteIsCheckMateException
+import de.beyondjava.chess.linearEngine.LinearChessboard
 import javafx.animation.KeyFrame
 import javafx.animation.Timeline
 import javafx.event.ActionEvent
@@ -35,15 +35,15 @@ class ChessMoveGUI {
     Text blackMoves = null
     Scene chessScene;
 
-    static Chessboard chessboard = new Chessboard()
+    static LinearChessboard chessboard = new LinearChessboard()
     static List<Move> showMoves = null;
 
-    public void draw(Chessboard c)
+    public void draw(LinearChessboard c)
     {
         chessboard=c;
         new ChessGUI().run()
     }
-    public  void draw(Chessboard c, List<Move> moves)
+    public  void draw(LinearChessboard c, List<Move> moves)
     {
         chessboard=c;
         showMoves=moves;
@@ -59,11 +59,11 @@ class ChessMoveGUI {
         }
     }
 
-     List<Chessboard> history = [new Chessboard()]
+     List<LinearChessboard> history = [new LinearChessboard()]
      List<String> whiteMoveHistory = []
      List<String> blackMoveHistory = []
 
-    public  void initiateTouch(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
+    public  void initiateTouch(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
         int piece = board.getChessPiece(row, column)
         if (board.isActivePlayersPiece(piece)) {
             fields[row][column].opacity = 0.7
@@ -74,14 +74,14 @@ class ChessMoveGUI {
         }
     }
 
-    public  void jadoube(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, Text checkmate) {
+    public  void jadoube(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
         checkmate.text = "\nJ'a doube!"
         fields[row][column].opacity = 1.0
         guiState.currentlyTouchedPieceY = -1
         guiState.currentlyTouchedPieceX = -1
     }
 
-    public  Chessboard onClick(int row, int column, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public  LinearChessboard onClick(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         if (board.checkmate || board.stalemate)
         {
             return board;
@@ -100,11 +100,11 @@ class ChessMoveGUI {
         return board;
     }
 
-    public Chessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, Chessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public LinearChessboard move(int fromRow, int fromColumn, int toRow, int toColumn, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         if (board.isMovePossible(fromRow, fromColumn, toRow, toColumn)) {
             fields[fromRow][fromColumn].opacity = 1.0
             addMoveNotation(board, toRow, toColumn, fromRow, fromColumn, whiteMoves, blackMoves)
-            board = board.moveChessPiece(fromRow, fromColumn, toRow, toColumn, board.activePlayerIsWhite?ChessConstants.w_dame:ChessConstants.s_dame)
+            board = board.moveChessPiece(fromRow, fromColumn, toRow, toColumn, 0)
             guiState.currentlyTouchedPieceX = -1
             guiState.currentlyTouchedPieceY = -1
             redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
@@ -120,7 +120,7 @@ class ChessMoveGUI {
         return board;
     }
 
-    private Chessboard opponentsMove(Chessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
+    private LinearChessboard opponentsMove(LinearChessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
         chessScene.setCursor(Cursor.WAIT)
         if (board.activePlayerIsWhite)
         {
@@ -173,12 +173,12 @@ class ChessMoveGUI {
 
     }
 
-    private void addMoveNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
+    private void addMoveNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
         String text = getNotation(board, toRow, toColumn, fromRow, fromColumn)
         if (board.activePlayerIsWhite) whiteMoves.text += "${board.moveCount}.$text\n" else blackMoves.text += "$text\n"
     }
 
-    private String getNotation(Chessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
+    private String getNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
         int capturedPiece = board.getChessPiece(toRow, toColumn)
         if (capturedPiece == -1) {
             if (board.activePlayerIsWhite) {
@@ -188,13 +188,13 @@ class ChessMoveGUI {
             }
         }
         Move m = new Move(board.getChessPiece(fromRow, fromColumn), fromRow, fromColumn, toRow, toColumn, 0, false, 0 != capturedPiece, capturedPiece)
-        Chessboard newBoard = board.moveChessPiece(m)
+        LinearChessboard newBoard = board.moveChessPiece(m)
         boolean check = board.activePlayerIsWhite ? newBoard.isBlackKingThreatened : newBoard.isWhiteKingThreatened
         m.opponentInCheck = check
         return m.getNotation()
     }
 
-    public void redraw(ImageView[][] fields, Chessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+    public void redraw(ImageView[][] fields, LinearChessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
         8.times
                 { int row ->
                     8.times
@@ -214,9 +214,9 @@ class ChessMoveGUI {
         }
     }
 
-    public Chessboard lastMove(Chessboard board, Text whiteMoves, Text blackMoves) {
+    public LinearChessboard lastMove(LinearChessboard board, Text whiteMoves, Text blackMoves) {
         if (history.size() > 0) {
-            Chessboard last = history[-2]
+            LinearChessboard last = history[-2]
             history = history[0..-2]
             if (whiteMoveHistory.size() > 1) {
                 whiteMoveHistory = whiteMoveHistory[0..-2]
