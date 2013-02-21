@@ -16,6 +16,8 @@ import javafx.scene.image.ImageView
 import javafx.scene.text.Text
 import javafx.util.Duration
 
+import java.text.NumberFormat
+
 /**
  * This class tries to make sense out of the users mouse clicks.
  * User: SoyYo
@@ -27,43 +29,42 @@ class ChessMoveGUI {
     def columnNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     def rowNames = ['8', '7', '6', '5', '4', '3', '2', '1']
 
-    ChessImages images=new ChessImages()
+    ChessImages images = new ChessImages()
     ImageView[][] fields = new ImageView[8][8];
     ChessGUIState state = new ChessGUIState();
     Text checkmate = null
     Text whiteMoves = null
     Text blackMoves = null
+    Text statistics = null
+    Text statistics2 = null
     Scene chessScene;
 
     static LinearChessboard chessboard = new LinearChessboard()
     static List<Move> showMoves = null;
 
-    public void draw(LinearChessboard c)
-    {
-        chessboard=c;
-        new ChessGUI().run()
-    }
-    public  void draw(LinearChessboard c, List<Move> moves)
-    {
-        chessboard=c;
-        showMoves=moves;
+    public void draw(LinearChessboard c) {
+        chessboard = c;
         new ChessGUI().run()
     }
 
-    public static void update()
-    {
-        if (showMoves!=null)
-        {
+    public void draw(LinearChessboard c, List<Move> moves) {
+        chessboard = c;
+        showMoves = moves;
+        new ChessGUI().run()
+    }
+
+    public static void update() {
+        if (showMoves != null) {
             double op = 0.8
-            showMoves.each{Move m -> fields[m.toRow][m.toColumn].opacity=op; op -= 0.1}
+            showMoves.each { Move m -> fields[m.toRow][m.toColumn].opacity = op; op -= 0.1 }
         }
     }
 
-     List<LinearChessboard> history = [new LinearChessboard()]
-     List<String> whiteMoveHistory = []
-     List<String> blackMoveHistory = []
+    List<LinearChessboard> history = [new LinearChessboard()]
+    List<String> whiteMoveHistory = []
+    List<String> blackMoveHistory = []
 
-    public  void initiateTouch(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
+    public void initiateTouch(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
         int piece = board.getChessPiece(row, column)
         if (board.isActivePlayersPiece(piece)) {
             fields[row][column].opacity = 0.7
@@ -74,16 +75,15 @@ class ChessMoveGUI {
         }
     }
 
-    public  void jadoube(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
+    public void jadoube(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, Text checkmate) {
         checkmate.text = "\nJ'a doube!"
         fields[row][column].opacity = 1.0
         guiState.currentlyTouchedPieceY = -1
         guiState.currentlyTouchedPieceX = -1
     }
 
-    public  LinearChessboard onClick(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
-        if (board.checkmate || board.stalemate)
-        {
+    public LinearChessboard onClick(int row, int column, ImageView[][] fields, LinearChessboard board, ChessGUIState guiState, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
+        if (board.checkmate || board.stalemate) {
             return board;
         }
         int piece = board.getChessPiece(row, column)
@@ -122,20 +122,40 @@ class ChessMoveGUI {
 
     private LinearChessboard opponentsMove(LinearChessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
         chessScene.setCursor(Cursor.WAIT)
-        if (board.activePlayerIsWhite)
-        {
-            checkmate.text="\nwhite's thinking..."
-        }
-        else
-        {
-            checkmate.text="\nblack's thinking..."
+        if (board.activePlayerIsWhite) {
+            checkmate.text = "\nwhite's thinking..."
+        } else {
+            checkmate.text = "\nblack's thinking..."
         }
         Timeline time = new Timeline();
         time.setCycleCount(1);
         KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
                 try {
-                    Move move = board.findBestMove()
+                    long start = System.nanoTime()
+                    Move move
+                    try {
+                        move = board.findBestMove()
+                    }
+                    finally {
+                        long dauer = System.nanoTime() - start;
+                        String s = "";
+                        def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
+                        def calc =NumberFormat.getInstance().format(((dauer / 1000) / 1000.0d))
+                        def eval =NumberFormat.getInstance().format((((int)(LinearChessboard.totalTime / 1000)) / 1000.0d) )
+                        def copy =NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard/1000)/1000) )
+                        def avg =NumberFormat.getInstance().format( ((int)(LinearChessboard.totalTime / LinearChessboard.evaluatedPositions))/1000.0d)
+                        def cores = Runtime.getRuntime().availableProcessors()
+                        s += "Calculation took $calc ms (* $cores cores)\n"
+                        s += "evaluation took  $eval ms\n";
+                        s += "copying boards took  $copy ms\n";
+                        s += "Average evaluation: $avg µs\n";
+                        statistics.text = s;
+                        s="ms Evalutated positions:" + evalPos + "\n";
+                        s = "Depth: ${LinearChessboard.depth}\n"
+                        s += "Width: ${LinearChessboard.width}\n"
+                        statistics2.text=s
+                    }
 //                if ((!board.stalemate) && (!board.checkmate)) {
                     if (null != move) {
                         addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
@@ -149,18 +169,18 @@ class ChessMoveGUI {
 //                }
                 }
                 catch (WhiteIsCheckMateException p_win) {
-                    blackMoves.text=blackMoves.text.trim()+"+";
+                    blackMoves.text = blackMoves.text.trim() + "+";
                     checkmate.text = "Checkmate!\nBlack wins!"
-                    board.checkmate=true
+                    board.checkmate = true
                 }
                 catch (BlackIsCheckMateException p_win) {
-                    whiteMoves.text=whiteMoves.text.trim()+"+";
+                    whiteMoves.text = whiteMoves.text.trim() + "+";
                     checkmate.text = "Checkmate!\nWhite wins!"
-                    board.checkmate=true
+                    board.checkmate = true
                 }
                 catch (EndOfGameException p_remis) {
                     checkmate.text = "\nStalemate!"
-                    board.stalemate=true
+                    board.stalemate = true
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
                 chessScene.setCursor(Cursor.HAND)
@@ -206,8 +226,7 @@ class ChessMoveGUI {
 //            checkmate.text = "Stalemate!"
         } else if (board.checkmate) {
 //            checkmate.text = "Checkmate!"
-        } else
-        if (board.activePlayerIsWhite) {
+        } else if (board.activePlayerIsWhite) {
             checkmate.text = "\nwhite move"
         } else {
             checkmate.text = "\nblack move"

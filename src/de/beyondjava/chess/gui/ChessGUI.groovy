@@ -10,7 +10,8 @@ uiElements.with {
     start {
         stage(title: 'Beyond Java Chess GUI using GroovyFX', show: true) {
             chessScene = scene {
-                rectangle(width: 1100, height: 880, fill: BLACK)
+                rectangle(width: 1100, height: 940, fill: Color.WHITE)
+                rectangle(width: 1100, height: 880, fill: Color.BLACK)
                 rectangle(x: 20, y: 60, width: 800, height: 800, fill: Color.SANDYBROWN)
                 rectangle(x: 60, y: 100, width: 720, height: 720, fill: Color.BLACK)
 
@@ -60,6 +61,8 @@ uiElements.with {
                         text: 'Source code by Stephan Rauh (www.beyondJava.net), published under GPL license. Use at your own risk.', fill: Color.BLACK)
                 text(layoutX: 0, layoutY: 920, font: '10pt sanserif',
                         text: 'Images licenced under GPL licence (taken from http://commons.wikimedia.org/wiki/Category:SVG_chess_pieces/Standard)', fill: Color.BLACK)
+                statistics=text(layoutX: 600, layoutY: 896, text: "", font: '11pt sanserif', fill: Color.BLACK)
+                statistics2=text(layoutX: 856, layoutY: 896, text: "", font: '11pt sanserif', fill: Color.BLACK)
 
             }
         }

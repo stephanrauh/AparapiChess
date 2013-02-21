@@ -283,11 +283,11 @@ public class ChessboardBasis implements ChessConstants {
                         else piece = w_bauer;
                     }
                     if (isWhitePiece(piece)) {
-                        if (canBeReachedByBlackPiece[row][col] > 0) {
-                            if (canBeReachedByBlackPiece[row][col] > canBeReachedByWhitePiece[row][col] + whiteAdvantage) {
+                        if (canBeReachedByTheseBlackPieces[row][col] > 0) {
+                            if (canBeReachedByTheseBlackPieces[row][col] > canBeReachedByTheseWhitePieces[row][col] + whiteAdvantage) {
                                 // piece is very likely to be captured
                                 blackPotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 1;
-                            } else if (canBeReachedByBlackPiece[row][col] >= canBeReachedByWhitePiece[row][col] + whiteAdvantage) {
+                            } else if (canBeReachedByTheseBlackPieces[row][col] >= canBeReachedByTheseWhitePieces[row][col] + whiteAdvantage) {
                                 // it's likely to became an equal exchange
                                 blackPotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 2;
                             } else {
@@ -296,11 +296,11 @@ public class ChessboardBasis implements ChessConstants {
                             }
                         }
                     } else {
-                        if (canBeReachedByWhitePiece[row][col] > 0) {
-                            if (canBeReachedByBlackPiece[row][col] < canBeReachedByWhitePiece[row][col] - whiteAdvantage) {
+                        if (canBeReachedByTheseWhitePieces[row][col] > 0) {
+                            if (canBeReachedByTheseBlackPieces[row][col] < canBeReachedByTheseWhitePieces[row][col] - whiteAdvantage) {
                                 // piece is very likely to be captured
                                 whitePotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 1;
-                            } else if (canBeReachedByBlackPiece[row][col] <= canBeReachedByWhitePiece[row][col] - whiteAdvantage) {
+                            } else if (canBeReachedByTheseBlackPieces[row][col] <= canBeReachedByTheseWhitePieces[row][col] - whiteAdvantage) {
                                 // it's likely to became an equal exchange
                                 whitePotentialMaterialValue += (s_MATERIAL_VALUE[piece]) >> 2;
                             } else {

@@ -8,6 +8,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class LinearChessboard extends LinearChessboardBasis {
+    public static int depth=2;
+    public static int width=2;
+
     public LinearChessboard() {
         super();
     }
@@ -31,11 +34,11 @@ public class LinearChessboard extends LinearChessboardBasis {
         LinearChessboard.totalTimeGetNewBoard = 0;
 
         long start = System.nanoTime();
-        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(4, 9, true) : findBestBlackMoves(4, 9, true);
+        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(depth, width, true) : findBestBlackMoves(depth, width, true);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + NumberFormat.getInstance().format( LinearChessboard.evaluatedPositions));
         System.out.println("evaluation took  " + ((LinearChessboard.totalTime/1000)/1000) + " ms");
-        System.out.println("copying boards took  " + ((LinearChessboard.totalTimeGetNewBoard/1000)/1000) + " ms");
+        System.out.println("copying boards took  " + ((LinearChessboard.totalTimeGetNewBoard/1000)/1000) + " µs");
         System.out.println("Average evaluation: " + LinearChessboard.totalTime/evaluatedPositions + " ns") ;
         int move = bestMoves[0];
         int fromRow = (move >> 12) & 0x000F;
@@ -67,7 +70,9 @@ public class LinearChessboard extends LinearChessboardBasis {
             List<XMove> bestEvaluatedMoves = new ArrayList<>();
 
             if (lookAhead > 0) {
-                bestEvaluatedMoves = findBestBlackMovesRecursively(lookAhead, movesToConsider - 1, moveComparator, evaluatedMoves, multithreading);
+                int mtc = movesToConsider - 1;
+                if (mtc<2) mtc=2;
+                bestEvaluatedMoves = findBestBlackMovesRecursively(lookAhead, mtc, moveComparator, evaluatedMoves, multithreading);
             } else {
                 for (int i = 0; i < evaluatedMoves.size() && bestEvaluatedMoves.size() < movesToConsider; i++) {
                     XMove e = (XMove) evaluatedMoves.get(i);
@@ -222,7 +227,9 @@ public class LinearChessboard extends LinearChessboardBasis {
             List<XMove> bestEvaluatedMoves = new ArrayList<>();
 
             if (lookAhead > 0) {
-                bestEvaluatedMoves = findBestWhiteMovesRecursively(lookAhead, movesToConsider - 1, moveComparator, evaluatedMoves, multithreading);
+                int mtc = movesToConsider - 1;
+                if (mtc<2) mtc=2;
+                bestEvaluatedMoves = findBestWhiteMovesRecursively(lookAhead, mtc, moveComparator, evaluatedMoves, multithreading);
             } else {
                 for (int i = 0; i < evaluatedMoves.size() && bestEvaluatedMoves.size() < movesToConsider; i++) {
                     XMove e = (XMove) evaluatedMoves.get(i);

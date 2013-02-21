@@ -20,10 +20,12 @@ public class LinearChessboardBasis implements ChessConstants {
     public static long totalTimeGetNewBoard = 0; // DEBUG
     public final int[] board;
     public final boolean activePlayerIsWhite;
-    public byte[] canBeReachedByWhitePiece = new byte[64];
-    public byte[] canBeReachedByBlackPiece = new byte[64];
+    public int[] canBeReachedByTheseWhitePieces = new int[64];
+    public int[] canBeReachedByTheseBlackPieces = new int[64];
     public int whiteMaterialValue=0;      // effectively final
     public int blackMaterialValue=0;      // effectively final
+    public int whiteExpectedLoss=0;      // effectively final
+    public int blackExpectedLoss=0;      // effectively final
     /**
      * Value of black pieces threatened by white pieces
      */
@@ -190,12 +192,10 @@ public class LinearChessboardBasis implements ChessConstants {
         evaluateFieldPositionalValue();
         findLegalMovesIgnoringCheck();
         evaluateThreats();
-//        whiteTotalValue = whiteMaterialValue*10 +  whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
-//        blackTotalValue = blackMaterialValue*10 +  blackFieldPositionValue + blackMoveValue + blackCoverageValue;
-        whiteTotalValue = whiteMaterialValue * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
-        blackTotalValue = blackMaterialValue * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
-        long dauer = System.nanoTime() - timer;
-        totalTime += dauer;
+        whiteTotalValue = (whiteMaterialValue-whiteExpectedLoss) * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+        blackTotalValue = (blackMaterialValue-blackExpectedLoss) * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+        long duration = System.nanoTime() - timer;
+        totalTime += duration;
         evaluatedPositions++;
     }
 
@@ -339,32 +339,39 @@ public class LinearChessboardBasis implements ChessConstants {
     private void evaluateThreats() {
         int whiteValue = 0;
         int blackValue = 0;
-        for (int cell=0; cell<64; cell++)
-        {
-            byte b = canBeReachedByBlackPiece[cell];
-            blackCoverageValue += b;
-            byte w = canBeReachedByWhitePiece[cell];
-            whiteCoverageValue += w;
+        for (int cell = 0; cell < 64; cell++) {
+            int b = canBeReachedByTheseBlackPieces[cell];
+            if (b > 0) {
+                blackCoverageValue ++;
+            }
+            int w = canBeReachedByTheseWhitePieces[cell];
+            if (w > 0) {
+                whiteCoverageValue ++;
+            }
 
             int piece = board[cell];
-            if (piece > 0 && (w>0 || b>0) ) {
-                if (isWhitePiece(piece)) {
-                    if (w - b < -1) {
-                        if (activePlayerIsWhite)
-                            blackCoverageValue += s_MATERIAL_VALUE[piece + 1]; // piece is going to be captured
-                        else
-                            blackCoverageValue += s_MATERIAL_VALUE[piece + 1] / 2; // piece is going to be captured
-                    } else if (w - b <= 0 && (!activePlayerIsWhite)) {
-                        blackCoverageValue += s_MATERIAL_VALUE[piece + 1] / 2; // piece is going to be captured
+            if (piece>0)
+            {
+                if (activePlayerIsWhite && (w>0) && isBlackPiece(piece))
+                {
+                    if (b>0)
+                    {
+                        System.out.println("Todo: Abtauschevaluation");
                     }
-                } else {
-                    if (w - b > 1) {
-                        if (activePlayerIsWhite)
-                            whiteCoverageValue += s_MATERIAL_VALUE[piece + 1] / 2; // piece is going to be captured
-                        else
-                            whiteCoverageValue += s_MATERIAL_VALUE[piece + 1]; // piece is going to be captured
-                    } else if (w - b >= 0 && (activePlayerIsWhite)) {
-                        whiteCoverageValue += s_MATERIAL_VALUE[piece + 1] / 2; // piece is going to be captured
+                    else
+                    {
+                        blackExpectedLoss+=s_MATERIAL_VALUE[1+piece];
+                    }
+                }
+                else if ((!activePlayerIsWhite) && (b>0) && isWhitePiece(piece))
+                {
+                    if (w>0)
+                    {
+                        System.out.println("Todo: Abtauschevaluation");
+                    }
+                    else
+                    {
+                        whiteExpectedLoss+=s_MATERIAL_VALUE[1+piece];
                     }
                 }
             }
@@ -735,9 +742,9 @@ public class LinearChessboardBasis implements ChessConstants {
     private void addFieldToPieceReach(int row, int column, int piece, boolean pieceIsWhite)
     {
         if (pieceIsWhite) {
-            canBeReachedByWhitePiece[(row<<3)+column]++;
+            canBeReachedByTheseWhitePieces[(row<<3)+column]= (canBeReachedByTheseWhitePieces[(row<<3)+column])<<8+piece;
         } else {
-            canBeReachedByBlackPiece[(row<<3)+column]++;
+            canBeReachedByTheseBlackPieces[(row<<3)+column]=(canBeReachedByTheseBlackPieces[(row<<3)+column])<<8+piece;
         }
     }
     private boolean canBeReachedByWhitePiece(int row, int column)
@@ -750,7 +757,7 @@ public class LinearChessboardBasis implements ChessConstants {
     }
     private int whitePieceReach(int row, int column)
     {
-        return canBeReachedByWhitePiece[(row<<3)+column];
+        return canBeReachedByTheseWhitePieces[(row<<3)+column];
     }
     private boolean canBeReachedByOpponentsPiece(int row, int column, boolean pieceIsWhite)
     {
@@ -759,9 +766,10 @@ public class LinearChessboardBasis implements ChessConstants {
         else
             return canBeReachedByWhitePiece(row, column);
     }
-        private int blackPieceReach(int row, int column)
+
+    private int blackPieceReach(int row, int column)
     {
-        return canBeReachedByBlackPiece[(row<<3)+column];
+        return canBeReachedByTheseBlackPieces[(row<<3)+column];
     }
 
 
