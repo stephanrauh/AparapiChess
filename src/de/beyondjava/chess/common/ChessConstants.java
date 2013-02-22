@@ -52,7 +52,7 @@ public interface ChessConstants {
     };
     String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H"};
     String[] rows = {"8", "7", "6", "5", "4", "3", "2", "1"};
-    String[] pieceName = {"P" /* en passant */,
+    String[] pieceName = {"E" /* en passant */,
             " ", " ", "P", "P", "P", "P",
             "R", "R", "R", "R",
             "N", "N", "N", "N",
@@ -82,6 +82,13 @@ public interface ChessConstants {
                     {0, 0, 0, 0, 0, 0, 0, 0},
             };
 
+    public static final int[] doublePawnBonus = {50 /* n/a */,50 /* A+B */,
+            60 /* B+C */,
+            70 /* C+D */,
+            80 /* D+E */,
+            70 /* E + F */,
+            60 /* F + G */,
+            50 /* G + H */};
 
 
 

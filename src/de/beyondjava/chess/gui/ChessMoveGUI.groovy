@@ -154,6 +154,7 @@ class ChessMoveGUI {
                         s="ms Evalutated positions:" + evalPos + "\n";
                         s = "Depth: ${LinearChessboard.depth}\n"
                         s += "Width: ${LinearChessboard.width}\n"
+                        s += LinearChessboard.multithreading?"multithreading":"single threading"
                         statistics2.text=s
                     }
 //                if ((!board.stalemate) && (!board.checkmate)) {
@@ -178,9 +179,14 @@ class ChessMoveGUI {
                     checkmate.text = "Checkmate!\nWhite wins!"
                     board.checkmate = true
                 }
-                catch (EndOfGameException p_remis) {
+                catch (EndOfGameException p_draw) {
                     checkmate.text = "\nStalemate!"
                     board.stalemate = true
+                }
+                catch (Exception p_error)
+                {
+                    checkmate.text="technical error\n"+p_error.getClass().getSimpleName()
+                    p_error.printStackTrace()
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
                 chessScene.setCursor(Cursor.HAND)

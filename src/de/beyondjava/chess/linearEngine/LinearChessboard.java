@@ -8,8 +8,9 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class LinearChessboard extends LinearChessboardBasis {
-    public static int depth=2;
-    public static int width=2;
+    public static int depth=6;
+    public static int width=4;
+    public static boolean multithreading=true;
 
     public LinearChessboard() {
         super();
@@ -34,7 +35,7 @@ public class LinearChessboard extends LinearChessboardBasis {
         LinearChessboard.totalTimeGetNewBoard = 0;
 
         long start = System.nanoTime();
-        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(depth, width, true) : findBestBlackMoves(depth, width, true);
+        int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(depth, width, multithreading) : findBestBlackMoves(depth, width, multithreading);
         long dauer = System.nanoTime() - start;
         System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + NumberFormat.getInstance().format( LinearChessboard.evaluatedPositions));
         System.out.println("evaluation took  " + ((LinearChessboard.totalTime/1000)/1000) + " ms");

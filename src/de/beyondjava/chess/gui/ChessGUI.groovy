@@ -10,7 +10,7 @@ uiElements.with {
     start {
         stage(title: 'Beyond Java Chess GUI using GroovyFX', show: true) {
             chessScene = scene {
-                rectangle(width: 1100, height: 940, fill: Color.WHITE)
+                rectangle(width: 1100, height: 960, fill: Color.WHITE)
                 rectangle(width: 1100, height: 880, fill: Color.BLACK)
                 rectangle(x: 20, y: 60, width: 800, height: 800, fill: Color.SANDYBROWN)
                 rectangle(x: 60, y: 100, width: 720, height: 720, fill: Color.BLACK)

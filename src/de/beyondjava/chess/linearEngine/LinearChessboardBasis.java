@@ -104,6 +104,9 @@ public class LinearChessboardBasis implements ChessConstants {
             }
         }
 //        evaluateMaterialValue();  // DEBUG
+        whiteTotalValue = (whiteMaterialValue-whiteExpectedLoss) * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+        blackTotalValue = (blackMaterialValue-blackExpectedLoss) * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+
     }
 
     private static int[] getNewBoard(LinearChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
@@ -191,6 +194,7 @@ public class LinearChessboardBasis implements ChessConstants {
 //        evaluateMaterialValue();
         evaluateFieldPositionalValue();
         findLegalMovesIgnoringCheck();
+        evaluateMobility();
         evaluateThreats();
         whiteTotalValue = (whiteMaterialValue-whiteExpectedLoss) * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
         blackTotalValue = (blackMaterialValue-blackExpectedLoss) * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
@@ -294,25 +298,32 @@ public class LinearChessboardBasis implements ChessConstants {
             for (int col = 0; col<8; col++)
             {
                 int piece = getChessPiece(row, col);
+                if (isWhitePiece(piece))
+                {
                 result += pieceName[piece+1];
+                }
+                else
+                {
+                    result += pieceName[piece+1].toLowerCase();
+                }
             }
             result +="\n";
         }
         return result;
     }
 
-    public void evaluateValueOfLegalMoves() {
+    public void evaluateMobility() {
         int whiteValue = numberOfWhiteMoves;
-        for (int i = 0; i < whiteValue; i++) {
-            int gain = whiteMoves[i] >> 24;
-            whiteValue += gain / 10;
-        }
+//        for (int i = 0; i < whiteValue; i++) {
+//            int gain = whiteMoves[i] >> 24;
+//            whiteValue += gain / 10;
+//        }
         whiteMoveValue = whiteValue;
         int blackValue = numberOfBlackMoves;
-        for (int i = 0; i < blackValue; i++) {
-            int gain = blackMoves[i] >> 24;
-            blackValue += gain / 10;
-        }
+//        for (int i = 0; i < blackValue; i++) {
+//            int gain = blackMoves[i] >> 24;
+//            blackValue += gain / 10;
+//        }
         blackMoveValue = blackValue;
     }
 
@@ -323,9 +334,21 @@ public class LinearChessboardBasis implements ChessConstants {
             for (int col = 0; col < 8; col++) {
                 int piece = getChessPiece(row,col);
                 if (piece == w_bauer) {
-                    whiteValue += whitePawnPositions[row][col];
+                    whiteValue += evaluatePawnPosition(row, col, piece, -1);
                 } else if (piece == s_bauer) {
-                    blackValue += whitePawnPositions[7 - row][col];
+                    blackValue += evaluatePawnPosition(row, col, piece, 1);
+                }
+                else if (piece==w_koenig)
+                {
+                    if (7==row) {
+                        blackValue+= evaluateKingsProtection(row, col, -1, w_bauer);
+                    }
+                }
+                else if (piece==s_koenig)
+                {
+                    if (0==row) {
+                        blackValue+= evaluateKingsProtection(row, col, 1, s_bauer);
+                    }
                 } else if (isWhitePiece(piece)) {
                     whiteValue += positions[row][col];
                 } else if (isBlackPiece(piece)) {
@@ -334,6 +357,66 @@ public class LinearChessboardBasis implements ChessConstants {
             }
         whiteFieldPositionValue = whiteValue;
         blackFieldPositionValue = blackValue;
+    }
+
+    private int evaluateKingsProtection(int row, int col, int direction, int protector) {
+        int protection = 0;
+        if (col != 3 && col != 4)     // discourage the king from staying in the center
+        {
+            if (col > 0) {
+                if (getChessPiece(row + direction, col - 1) == protector) {
+                    protection += 40;
+                } else if (getChessPiece(row + 2 * direction, col - 1) == protector) {
+                    protection += 20;
+                }
+            }
+            if (getChessPiece(row + direction, col) == protector) {
+                protection += 40;
+            } else if (getChessPiece(row + 2 * direction, col) == protector) {
+                protection += 20;
+            }
+            if (col < 7) {
+                if (getChessPiece(row + direction, col + 1) == protector) {
+                    protection += 40;
+                } else if (getChessPiece(row + 2 * direction, col + 1) == protector) {
+                    protection += 20;
+                }
+            }
+        }
+        return protection;
+    }
+
+    private int evaluatePawnPosition(int row, int col, int piece, int direction) {
+        int value=0;
+        int normalizedRow = direction<0?row:(7-row);
+        value += whitePawnPositions[normalizedRow][col];
+        boolean advancedRow = (normalizedRow <= 4);
+        // double pawn bonus
+        if ((col > 0)&&advancedRow && getChessPiece(row, col - 1) ==piece)
+        {
+            value += doublePawnBonus[col];
+        }
+        // row chains
+        if ((col>0) && advancedRow && getChessPiece(row + direction, col - 1) == piece) {
+            value += doublePawnBonus[col];
+        }
+        if ((col<7) && advancedRow && getChessPiece(row+direction, col + 1) == piece) {
+            value += doublePawnBonus[col];
+        }
+        // blocked pawns
+        if (row>1 && row<6)
+        {
+            int pieceInFront = getChessPiece(row+direction, col);
+            if (pieceInFront>0)
+            {
+                if (pieceInFront==piece)
+                {
+                    value -= whitePawnPositions[normalizedRow][col];
+                }
+            }
+        }
+
+        return value;
     }
 
     private void evaluateThreats() {
