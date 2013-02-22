@@ -8,17 +8,15 @@ import de.beyondjava.chess.linearEngine.LinearChessboard
 import javafx.concurrent.Task
 import javafx.scene.Cursor
 import javafx.scene.Scene
+import javafx.scene.control.CheckBox
 import javafx.scene.control.ProgressIndicator
+import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
 
 import java.text.NumberFormat
 /**
  * This class tries to make sense out of the users mouse clicks.
- * User: SoyYo
- * Date: 02.02.13
- * Time: 21:40
- * To change this template use File | Settings | File Templates.
  */
 class ChessMoveGUI {
     def columnNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
@@ -34,6 +32,9 @@ class ChessMoveGUI {
     Text statistics2 = null
     Scene chessScene;
     ProgressIndicator progress;
+    Slider depthSlider;
+    Slider widthSlider;
+    CheckBox multithreadingCheckbox;
 
     static LinearChessboard chessboard = new LinearChessboard()
     static List<Move> showMoves = null;
@@ -107,8 +108,6 @@ class ChessMoveGUI {
             history += board
             whiteMoveHistory += whiteMoves.text
             blackMoveHistory += blackMoves.text
-//            PrimitiveMoveGenerator generator = new PrimitiveMoveGenerator(board.board, board.activePlayerIsWhite);
-//            def move = generator.findBestMove()
             board = opponentsMove(board, whiteMoves, blackMoves, checkmate, fields, images)
         } else {
             checkmate.text = "\nillegal move"
@@ -117,6 +116,9 @@ class ChessMoveGUI {
     }
 
     private LinearChessboard opponentsMove(LinearChessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
+        board.multithreading=multithreadingCheckbox.selected
+        board.width=widthSlider.value
+        board.depth=depthSlider.value
         Task<Void> task = new Task<Void>() {
             public Void call() {
                 try {
@@ -127,7 +129,6 @@ class ChessMoveGUI {
                         checkmate.text = "\nblack's thinking..."
                     }
                     long start = System.nanoTime()
-                    updateProgress(50,100)
                     Move move
                     try {
                         move = board.findBestMove()
@@ -146,13 +147,12 @@ class ChessMoveGUI {
                         s += "copying boards took  $copy ms\n";
                         s += "Average evaluation: $avg µs\n";
                         statistics.text = s;
-                        s = "ms Evalutated positions:" + evalPos + "\n";
-                        s = "Depth: ${LinearChessboard.depth}\n"
+                        s = "Evalutated positions:" + evalPos + "\n";
+                        s += "Depth: ${LinearChessboard.depth}\n"
                         s += "Width: ${LinearChessboard.width}\n"
                         s += LinearChessboard.multithreading ? "multithreading" : "single threading"
                         statistics2.text = s
                     }
-//                if ((!board.stalemate) && (!board.checkmate)) {
                     if (null != move) {
                         addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
                         board = board.moveChessPiece(move)
@@ -162,7 +162,6 @@ class ChessMoveGUI {
                         blackMoveHistory += blackMoves.text
                     } else
                         checkmate.text = "(error)"
-//                }
                 }
                 catch (WhiteIsCheckMateException p_win) {
                     blackMoves.text = blackMoves.text.trim() + "+";

@@ -14,6 +14,12 @@ import de.beyondjava.chess.common.Piece;
  * Time: 19:17
  */
 public class LinearChessboardBasis implements ChessConstants {
+    public boolean blackCastlingLeftPossible=true;
+    public boolean blackCastlingRightPossible=true;
+    public boolean whiteCastlingLeftPossible=true;
+    public boolean whiteCastlingRightPossible=true;
+    public boolean blackHasCastled=false;
+    public boolean whiteHasCastled=false;
     public int moveCount=0;
     public static int evaluatedPositions = 0; // DEBUG
     public static long totalTime = 0; // DEBUG
@@ -51,26 +57,42 @@ public class LinearChessboardBasis implements ChessConstants {
     public boolean stalemate = false;
     public boolean checkmate = false;
 
-    private LinearChessboardBasis(boolean activePlayerIsWhite, int[] board) {
+    private LinearChessboardBasis(boolean activePlayerIsWhite, int[] board, int oldMoveCount) {
         this.activePlayerIsWhite = activePlayerIsWhite;
         this.board = board;
         if (activePlayerIsWhite)
         {
-            moveCount++;
+            moveCount=oldMoveCount+1;
+        }
+        else
+        {
+            moveCount=oldMoveCount;
+        }
+        if (board[0]!=s_turm) blackCastlingLeftPossible=false;
+        if (board[7]!=s_turm) blackCastlingRightPossible=false;
+        if (board[56]!=w_turm) whiteCastlingRightPossible=false;
+        if (board[63]!=w_turm) whiteCastlingRightPossible=false;
+        if (board[4]!=s_koenig) {
+            blackCastlingLeftPossible=false;
+            blackCastlingRightPossible=false;
+        }
+        if (board[60]!=w_koenig) {
+            whiteCastlingLeftPossible=false;
+            whiteCastlingRightPossible=false;
         }
         evaluateBoard();
     }
 
     public LinearChessboardBasis() {
-        this(true, ChessConstants.initialLinearBoard);
+        this(true, ChessConstants.initialLinearBoard, 0);
     }
 
     public LinearChessboardBasis(boolean activePlayerIsWhite, LinearChessboardBasis board) {
-        this(activePlayerIsWhite, board.board);
+        this(activePlayerIsWhite, board.board, board.moveCount);
     }
 
     public LinearChessboardBasis(LinearChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
-        this(!oldBoard.activePlayerIsWhite, getNewBoard(oldBoard, fromRow, fromColumn, toRow, toColumn, promotedPiece));
+        this(!oldBoard.activePlayerIsWhite, getNewBoard(oldBoard, fromRow, fromColumn, toRow, toColumn, promotedPiece), oldBoard.moveCount);
         whiteMaterialValue=oldBoard.whiteMaterialValue;
         blackMaterialValue=oldBoard.blackMaterialValue;
         int movedPiece = oldBoard.getChessPiece(fromRow, fromColumn);
@@ -314,12 +336,37 @@ public class LinearChessboardBasis implements ChessConstants {
 
     public void evaluateMobility() {
         int whiteValue = numberOfWhiteMoves;
+        if (whiteCastlingLeftPossible && whiteCastlingRightPossible)
+        {
+            whiteValue+=90;
+        }
+        else if (whiteCastlingLeftPossible && whiteCastlingRightPossible)
+        {
+            whiteValue+=70;
+        }
+        else if (whiteHasCastled)
+        {
+            whiteValue+=90;
+        }
 //        for (int i = 0; i < whiteValue; i++) {
 //            int gain = whiteMoves[i] >> 24;
 //            whiteValue += gain / 10;
 //        }
         whiteMoveValue = whiteValue;
         int blackValue = numberOfBlackMoves;
+        if (blackCastlingLeftPossible && blackCastlingRightPossible)
+        {
+            blackValue+=90;
+        }
+        else if (blackCastlingLeftPossible && blackCastlingRightPossible)
+        {
+            blackValue+=70;
+        }
+        else if (blackHasCastled)
+        {
+            blackValue+=90;
+        }
+
 //        for (int i = 0; i < blackValue; i++) {
 //            int gain = blackMoves[i] >> 24;
 //            blackValue += gain / 10;

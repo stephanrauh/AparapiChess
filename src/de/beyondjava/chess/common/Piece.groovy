@@ -1,12 +1,5 @@
 package de.beyondjava.chess.common
-/**
- * Created with IntelliJ IDEA.
- * User: SoyYo
- * Date: 07.02.13
- * Time: 21:55
- * To change this template use File | Settings | File Templates.
- */
-class Piece implements ChessConstants {
+public class Piece implements ChessConstants {
     public int row;
     public int column;
     public int piece;

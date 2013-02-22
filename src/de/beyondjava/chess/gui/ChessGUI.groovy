@@ -9,15 +9,22 @@ uiElements.with {
     start {
         stage(title: 'Beyond Java Chess GUI using GroovyFX', show: true) {
             chessScene = scene {
-                rectangle(width: 1100, height: 960, fill: Color.WHITE)
+                rectangle(width: 1100, height: 940, fill: Color.WHITE)
                 rectangle(width: 1100, height: 880, fill: Color.BLACK)
                 rectangle(x: 20, y: 60, width: 800, height: 800, fill: Color.SANDYBROWN)
                 rectangle(x: 60, y: 100, width: 720, height: 720, fill: Color.BLACK)
 
-                toolBar {
+
+                toolBar(prefWidth: 1100) {
                     button(text: "flip board", onAction: { chessboard = opponentsMove(chessboard, whiteMoves, blackMoves, checkmate, fields, images) })
                     button(text: "new game", onAction: { chessboard = new LinearChessboard(); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
                     button(text: "back", onAction: { chessboard = lastMove(chessboard, whiteMoves, blackMoves); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
+                    text(text: " Calculation depth:")
+                    depthSlider= slider(min: 2, max: 10, value: LinearChessboard.depth, orientation: "horizontal", showTickMarks: true, prefWidth: 200, snapToTicks: true, majorTickUnit: 2, minorTickCount: 1, showTickLabels: true)
+                    text(text: " Calculation width:")
+
+                    widthSlider = slider(min: 3, max: 12, value: LinearChessboard.width, orientation: "horizontal", showTickMarks: true, prefWidth: 200, snapToTicks: true, majorTickUnit: 3, minorTickCount: 2, showTickLabels: true)
+                    multithreadingCheckbox=checkBox (text: "Multithreading",selected: LinearChessboard.multithreading)
                 }
 
                 group {
@@ -51,19 +58,18 @@ uiElements.with {
                     }
 
                 }
-                progress = progressIndicator(layoutX: 500, layoutY: 450, maxWidth:100, maxHeight:100, visible:false);
-
-                whiteMoves = text(layoutX: 856, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
-                blackMoves = text(layoutX: 970, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
+                progress = progressIndicator(layoutX: 402, layoutY: 442, maxWidth: 100, maxHeight: 100, visible: false);
+                whiteMoves = text(layoutY:80, layoutX:856, text: "", font: '18pt sanserif', fill: Color.WHEAT)
+                blackMoves = text(layoutY:80, layoutX:970, text: "", font: '18pt sanserif', fill: Color.WHEAT)
                 checkmate = text(layoutX: 856, layoutY: 816, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)
 
-                text(layoutX: 0, layoutY: 896, font: '10pt sanserif', text: 'Legal notes:', fill: Color.BLACK)
-                text(layoutX: 0, layoutY: 908, font: '10pt sanserif',
+                text(layoutX: 0, layoutY: 892, font: '10pt sanserif', text: 'Legal notes:', fill: Color.BLACK)
+                text(layoutX: 0, layoutY: 905, font: '10pt sanserif',
                         text: 'Source code by Stephan Rauh (www.beyondJava.net), published under GPL license. Use at your own risk.', fill: Color.BLACK)
-                text(layoutX: 0, layoutY: 920, font: '10pt sanserif',
+                text(layoutX: 0, layoutY: 916, font: '10pt sanserif',
                         text: 'Images licenced under GPL licence (taken from http://commons.wikimedia.org/wiki/Category:SVG_chess_pieces/Standard)', fill: Color.BLACK)
-                statistics=text(layoutX: 600, layoutY: 896, text: "", font: '11pt sanserif', fill: Color.BLACK)
-                statistics2=text(layoutX: 856, layoutY: 896, text: "", font: '11pt sanserif', fill: Color.BLACK)
+                statistics = text(layoutX: 600, layoutY: 892, text: "", font: '11pt sanserif', fill: Color.BLACK)
+                statistics2 = text(layoutX: 856, layoutY: 892, text: "", font: '11pt sanserif', fill: Color.BLACK)
 
             }
         }

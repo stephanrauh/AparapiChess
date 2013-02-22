@@ -10,6 +10,7 @@
     <orderEntry type="library" name="JavaFX 2.2" level="project" />
     <orderEntry type="library" name="groovyfx-0.3.1" level="project" />
     <orderEntry type="library" name="groovy-2.1.0" level="application" />
+    <orderEntry type="library" name="aparapi" level="project" />
   </component>
 </module>
 

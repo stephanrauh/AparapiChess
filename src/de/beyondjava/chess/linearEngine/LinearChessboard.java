@@ -8,8 +8,8 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class LinearChessboard extends LinearChessboardBasis {
-    public static int depth=6;
-    public static int width=4;
+    public static int depth=5;
+    public static int width=8;
     public static boolean multithreading=true;
 
     public LinearChessboard() {
