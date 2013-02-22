@@ -1,5 +1,4 @@
 package de.beyondjava.chess.gui
-
 import de.beyondjava.chess.linearEngine.LinearChessboard
 import javafx.scene.paint.Color
 
@@ -52,6 +51,8 @@ uiElements.with {
                     }
 
                 }
+                progress = progressIndicator(layoutX: 500, layoutY: 450, maxWidth:100, maxHeight:100, visible:false);
+
                 whiteMoves = text(layoutX: 856, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
                 blackMoves = text(layoutX: 970, layoutY: 100, text: "", font: '18pt sanserif', fill: Color.WHEAT)
                 checkmate = text(layoutX: 856, layoutY: 816, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)

@@ -1,23 +1,18 @@
 package de.beyondjava.chess.gui
-
 import de.beyondjava.chess.Exceptions.BlackIsCheckMateException
 import de.beyondjava.chess.Exceptions.EndOfGameException
 import de.beyondjava.chess.Exceptions.WhiteIsCheckMateException
 import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
 import de.beyondjava.chess.linearEngine.LinearChessboard
-import javafx.animation.KeyFrame
-import javafx.animation.Timeline
-import javafx.event.ActionEvent
-import javafx.event.EventHandler
+import javafx.concurrent.Task
 import javafx.scene.Cursor
 import javafx.scene.Scene
+import javafx.scene.control.ProgressIndicator
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
-import javafx.util.Duration
 
 import java.text.NumberFormat
-
 /**
  * This class tries to make sense out of the users mouse clicks.
  * User: SoyYo
@@ -38,6 +33,7 @@ class ChessMoveGUI {
     Text statistics = null
     Text statistics2 = null
     Scene chessScene;
+    ProgressIndicator progress;
 
     static LinearChessboard chessboard = new LinearChessboard()
     static List<Move> showMoves = null;
@@ -121,18 +117,17 @@ class ChessMoveGUI {
     }
 
     private LinearChessboard opponentsMove(LinearChessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
-        chessScene.setCursor(Cursor.WAIT)
-        if (board.activePlayerIsWhite) {
-            checkmate.text = "\nwhite's thinking..."
-        } else {
-            checkmate.text = "\nblack's thinking..."
-        }
-        Timeline time = new Timeline();
-        time.setCycleCount(1);
-        KeyFrame keyFrame = new KeyFrame(Duration.millis(47), new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event) {
+        Task<Void> task = new Task<Void>() {
+            public Void call() {
                 try {
+                    chessScene.setCursor(Cursor.WAIT)
+                    if (board.activePlayerIsWhite) {
+                        checkmate.text = "\nwhite's thinking..."
+                    } else {
+                        checkmate.text = "\nblack's thinking..."
+                    }
                     long start = System.nanoTime()
+                    updateProgress(50,100)
                     Move move
                     try {
                         move = board.findBestMove()
@@ -141,21 +136,21 @@ class ChessMoveGUI {
                         long dauer = System.nanoTime() - start;
                         String s = "";
                         def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
-                        def calc =NumberFormat.getInstance().format(((dauer / 1000) / 1000.0d))
-                        def eval =NumberFormat.getInstance().format((((int)(LinearChessboard.totalTime / 1000)) / 1000.0d) )
-                        def copy =NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard/1000)/1000) )
-                        def avg =NumberFormat.getInstance().format( ((int)(LinearChessboard.totalTime / LinearChessboard.evaluatedPositions))/1000.0d)
+                        def calc = NumberFormat.getInstance().format(((dauer / 1000) / 1000.0d))
+                        def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 1000)) / 1000.0d))
+                        def copy = NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard / 1000) / 1000))
+                        def avg = NumberFormat.getInstance().format(((int) (LinearChessboard.totalTime / LinearChessboard.evaluatedPositions)) / 1000.0d)
                         def cores = Runtime.getRuntime().availableProcessors()
                         s += "Calculation took $calc ms (* $cores cores)\n"
                         s += "evaluation took  $eval ms\n";
                         s += "copying boards took  $copy ms\n";
                         s += "Average evaluation: $avg µs\n";
                         statistics.text = s;
-                        s="ms Evalutated positions:" + evalPos + "\n";
+                        s = "ms Evalutated positions:" + evalPos + "\n";
                         s = "Depth: ${LinearChessboard.depth}\n"
                         s += "Width: ${LinearChessboard.width}\n"
-                        s += LinearChessboard.multithreading?"multithreading":"single threading"
-                        statistics2.text=s
+                        s += LinearChessboard.multithreading ? "multithreading" : "single threading"
+                        statistics2.text = s
                     }
 //                if ((!board.stalemate) && (!board.checkmate)) {
                     if (null != move) {
@@ -183,18 +178,16 @@ class ChessMoveGUI {
                     checkmate.text = "\nStalemate!"
                     board.stalemate = true
                 }
-                catch (Exception p_error)
-                {
-                    checkmate.text="technical error\n"+p_error.getClass().getSimpleName()
+                catch (Exception p_error) {
+                    checkmate.text = "technical error\n" + p_error.getClass().getSimpleName()
                     p_error.printStackTrace()
                 }
                 redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
                 chessScene.setCursor(Cursor.HAND)
             }
-        });
-
-        time.getKeyFrames().add(keyFrame);
-        time.playFromStart()
+        };
+        progress.visibleProperty().bind(task.runningProperty());
+        new Thread(task).start()
         return board
 
     }
