@@ -8,8 +8,8 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class LinearChessboard extends LinearChessboardBasis {
-    public static int depth=5;
-    public static int width=8;
+    public static int depth=6;
+    public static int width=7;
     public static boolean multithreading=true;
 
     public LinearChessboard() {
@@ -20,7 +20,7 @@ public class LinearChessboard extends LinearChessboardBasis {
         super(activePlayerIsWhite, board);
     }
 
-//    public LinearChessboard(boolean activePlayerIsWhite, Piece... pieces) {
+//    public AparapiChessboards(boolean activePlayerIsWhite, Piece... pieces) {
 //        super(activePlayerIsWhite, pieces);
 //    }
 
@@ -37,7 +37,7 @@ public class LinearChessboard extends LinearChessboardBasis {
         long start = System.nanoTime();
         int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(depth, width, multithreading) : findBestBlackMoves(depth, width, multithreading);
         long dauer = System.nanoTime() - start;
-        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + NumberFormat.getInstance().format( LinearChessboard.evaluatedPositions));
+        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated POSITIONAL_VALUES:" + NumberFormat.getInstance().format( LinearChessboard.evaluatedPositions));
         System.out.println("evaluation took  " + ((LinearChessboard.totalTime/1000)/1000) + " ms");
         System.out.println("copying boards took  " + ((LinearChessboard.totalTimeGetNewBoard/1000)/1000) + " µs");
         System.out.println("Average evaluation: " + LinearChessboard.totalTime/evaluatedPositions + " ns") ;

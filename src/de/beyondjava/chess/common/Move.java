@@ -37,10 +37,32 @@ public class Move implements Comparable<Move> {
     }
 
     public String getNotation() {
+        return getNotation(false);
+    }
+
+        public String getNotation(boolean enPassant) {
         String check = opponentInCheck ? "+" : " ";
         String s = capture ? "x" : "-";
-        s += pieceName[capturedPiece + 1];
-        return pieceName[piece + 1] + columns[fromColumn] + rows[fromRow] + s + columns[toColumn] + rows[toRow] + check;
+        s += PIECE_NAME[capturedPiece + 1];
+        if (piece==W_KING && fromRow==7 && toRow==7 && fromColumn==4 && toColumn==6)
+        {
+            return "0-0";
+        }
+        if (piece==W_KING && fromRow==7 && toRow==7 && fromColumn==4 && toColumn==2)
+        {
+            return "0-0-0";
+        }
+        if (piece==B_KING && fromRow==0 && toRow==0 && fromColumn==4 && toColumn==6)
+        {
+            return "0-0";
+        }
+        if (piece==B_KING && fromRow==0 && toRow==0 && fromColumn==4 && toColumn==2)
+        {
+            return "0-0-0";
+        }
+        String ep=enPassant?"e.p.":"";
+
+        return PIECE_NAME[piece + 1] + COLUMNS[fromColumn] + ROWS[fromRow] + s + COLUMNS[toColumn] + ROWS[toRow] + ep + check;
     }
 
     public String toString() {

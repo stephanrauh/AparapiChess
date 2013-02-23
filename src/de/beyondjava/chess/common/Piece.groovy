@@ -14,12 +14,12 @@ public class Piece implements ChessConstants {
         column = c - 65;
         switch (p)
         {
-            case 'P': piece=s_bauer; break;
-            case 'R': piece=s_turm; break;
-            case 'B': piece=s_laeufer; break;
-            case 'N': piece=s_springer; break;
-            case 'Q': piece=s_dame; break;
-            case 'K':piece = s_koenig; break;
+            case 'P': piece=B_PAWN; break;
+            case 'R': piece=B_ROOK; break;
+            case 'B': piece=B_BISHOP; break;
+            case 'N': piece=B_KNIGHT; break;
+            case 'Q': piece=B_QUEEN; break;
+            case 'K':piece = B_KING; break;
             default: println "Unknown piece";
         }
         if (color=='W')

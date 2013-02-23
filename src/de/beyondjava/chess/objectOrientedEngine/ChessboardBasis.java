@@ -59,7 +59,7 @@ public class ChessboardBasis implements ChessConstants {
     }
 
     public ChessboardBasis() {
-        this(true, ChessConstants.initialBoard);
+        this(true, ChessConstants.INITIAL_BOARD);
     }
 
     public ChessboardBasis(boolean activePlayerIsWhite, ChessboardBasis board) {
@@ -90,7 +90,7 @@ public class ChessboardBasis implements ChessConstants {
             newBoard[fromRow][toColumn] = 0;
         }
         int piece = newBoard[fromRow][fromColumn];
-        if (piece == w_bauer) {
+        if (piece == W_PAWN) {
             if (fromRow - toRow == 2)
                 newBoard[fromRow - 1][toColumn] = -1; // allow for en passant
             if (toRow == 0) {
@@ -98,10 +98,10 @@ public class ChessboardBasis implements ChessConstants {
                 if (promotedPiece > 0) {
                     piece = promotedPiece;
                 } else
-                    piece = w_dame;
+                    piece = W_QUEEN;
             }
         }
-        if (piece == s_bauer) {
+        if (piece == B_PAWN) {
             if (fromRow - toRow == -2)
                 newBoard[fromRow + 1][toColumn] = -1; // allow for en passant
             if (toRow == 7) {
@@ -109,10 +109,10 @@ public class ChessboardBasis implements ChessConstants {
                 if (promotedPiece > 0) {
                     piece = promotedPiece;
                 } else
-                    piece = s_dame;
+                    piece = B_QUEEN;
             }
         }
-        if ((piece == w_koenig && fromRow == 7) || (piece == s_koenig && fromRow == 0)) {
+        if ((piece == W_KING && fromRow == 7) || (piece == B_KING && fromRow == 0)) {
             if (fromColumn == 4 && toColumn == 6) {
                 // castling right hand side
                 newBoard[fromRow][5] = newBoard[fromRow][7];
@@ -253,14 +253,14 @@ public class ChessboardBasis implements ChessConstants {
         for (int row = 0; row < 8; row++)
             for (int col = 0; col < 8; col++) {
                 int piece = getChessPiece(row,col);
-                if (piece == w_bauer) {
-                    whiteValue += whitePawnPositions[row][col];
-                } else if (piece == s_bauer) {
-                    blackValue += whitePawnPositions[7 - row][col];
+                if (piece == W_PAWN) {
+                    whiteValue += WHITE_PAWN_POSITION_VALUES[row][col];
+                } else if (piece == B_PAWN) {
+                    blackValue += WHITE_PAWN_POSITION_VALUES[7 - row][col];
                 } else if (isWhitePiece(piece)) {
-                    whiteValue += positions[row][col];
+                    whiteValue += POSITIONAL_VALUES[row][col];
                 } else if (isBlackPiece(piece)) {
-                    blackValue += positions[row][col];
+                    blackValue += POSITIONAL_VALUES[row][col];
                 }
             }
         whiteFieldPositionValue = whiteValue;
@@ -279,8 +279,8 @@ public class ChessboardBasis implements ChessConstants {
                 int piece = board[row][col];
                 if (piece != 0) {
                     if (piece < 0) {
-                        if (activePlayerIsWhite) piece = s_bauer;
-                        else piece = w_bauer;
+                        if (activePlayerIsWhite) piece = B_PAWN;
+                        else piece = W_PAWN;
                     }
                     if (isWhitePiece(piece)) {
                         if (canBeReachedByTheseBlackPieces[row][col] > 0) {
@@ -358,15 +358,15 @@ public class ChessboardBasis implements ChessConstants {
         }
         if (isInsideBoard(nr, nc) && isEmptyField(nr, nc)) {
             if (nr == 0 && pieceIsWhite) {
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, s_springer);
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, s_laeufer);
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, s_turm);
-                addPossibleMove(row, column, nr, nc, pieceIsWhite, s_dame);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, B_KNIGHT);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, B_BISHOP);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, B_ROOK);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, B_QUEEN);
             } else if (nr == 7 && (!pieceIsWhite)) {
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, w_springer);
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, w_laeufer);
-                //addPossibleMove(row, column, nr, nc, pieceIsWhite, w_turm);
-                addPossibleMove(row, column, nr, nc, pieceIsWhite, w_dame);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, W_KNIGHT);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, W_BISHOP);
+                //addPossibleMove(row, column, nr, nc, pieceIsWhite, W_ROOK);
+                addPossibleMove(row, column, nr, nc, pieceIsWhite, W_QUEEN);
             } else {
                 addPossibleMove(row, column, nr, nc, pieceIsWhite);
             }
@@ -602,12 +602,12 @@ public class ChessboardBasis implements ChessConstants {
             {
                 if (isEmptyField(nr, 5) && isEmptyField(nr, 6)) {
                     int piece = getChessPiece(nr, 7);
-                    if (piece == s_turm && (!pieceIsWhite)) {
+                    if (piece == B_ROOK && (!pieceIsWhite)) {
                         if (canBeReachedByWhitePiece(nr,4) == false && canBeReachedByWhitePiece(nr,5) == false && canBeReachedByWhitePiece(nr,6) == false) {
                             addPossibleMove(row, column, row, column + 2, pieceIsWhite);
                         }
                     }
-                    if (piece == w_turm && (pieceIsWhite)) {
+                    if (piece == W_ROOK && (pieceIsWhite)) {
                         if (canBeReachedByBlackPiece(nr,4) == false && canBeReachedByBlackPiece(nr,5) == false && canBeReachedByBlackPiece(nr,6) == false) {
                             addPossibleMove(row, column, row, column + 2, pieceIsWhite);
                         }
@@ -621,12 +621,12 @@ public class ChessboardBasis implements ChessConstants {
             if (nc == 4) {
                 if (isEmptyField(nr, 3) && isEmptyField(nr, 2) && isEmptyField(nr, 1)) {
                     int piece = getChessPiece(nr, 0);
-                    if (piece == s_turm && (!pieceIsWhite)) {
+                    if (piece == B_ROOK && (!pieceIsWhite)) {
                         if (canBeReachedByWhitePiece(nr,4) == false && canBeReachedByWhitePiece(nr,3) == false && canBeReachedByWhitePiece(nr,2)==false) {
                             addPossibleMove(row, column, row, column - 2, pieceIsWhite);
                         }
                     }
-                    if (piece == w_turm && (pieceIsWhite)) {
+                    if (piece == W_ROOK && (pieceIsWhite)) {
                         if (canBeReachedByBlackPiece(nr,4) == false && canBeReachedByBlackPiece(nr,3) == false && canBeReachedByBlackPiece(nr,2)==false) {
                             addPossibleMove(row, column, row, column - 2, pieceIsWhite);
                         }
@@ -660,10 +660,10 @@ public class ChessboardBasis implements ChessConstants {
     private void addPossibleMove(int fromRow, int fromColumn, int toRow, int toColumn, boolean pieceIsWhite, int promotedPiece) {
         int capturedPiece = getChessPiece(toRow,toColumn);
         if (capturedPiece < 0) {
-            capturedPiece = pieceIsWhite ? s_bauer : w_bauer;
-        } else if (capturedPiece == w_koenig) {
+            capturedPiece = pieceIsWhite ? B_PAWN : W_PAWN;
+        } else if (capturedPiece == W_KING) {
             isWhiteKingThreatened = true;
-        } else if (capturedPiece == s_koenig) {
+        } else if (capturedPiece == B_KING) {
             isBlackKingThreatened = true;
         }
         int m = move(fromRow, fromColumn, toRow, toColumn, capturedPiece, promotedPiece);

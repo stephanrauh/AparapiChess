@@ -59,9 +59,9 @@ uiElements.with {
 
                 }
                 progress = progressIndicator(layoutX: 402, layoutY: 442, maxWidth: 100, maxHeight: 100, visible: false);
-                whiteMoves = text(layoutY:80, layoutX:856, text: "", font: '18pt sanserif', fill: Color.WHEAT)
-                blackMoves = text(layoutY:80, layoutX:970, text: "", font: '18pt sanserif', fill: Color.WHEAT)
-                checkmate = text(layoutX: 856, layoutY: 816, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)
+                whiteMoves = text(layoutY:80, layoutX:840, text: "", font: '18pt sanserif', fill: Color.WHEAT)
+                blackMoves = text(layoutY:80, layoutX:984, text: "", font: '18pt sanserif', fill: Color.WHEAT)
+                checkmate = text(layoutX: 840, layoutY: 816, text: "Checkmate!", font: '30pt sanserif', fill: Color.GOLD)
 
                 text(layoutX: 0, layoutY: 892, font: '10pt sanserif', text: 'Legal notes:', fill: Color.BLACK)
                 text(layoutX: 0, layoutY: 905, font: '10pt sanserif',
@@ -69,7 +69,7 @@ uiElements.with {
                 text(layoutX: 0, layoutY: 916, font: '10pt sanserif',
                         text: 'Images licenced under GPL licence (taken from http://commons.wikimedia.org/wiki/Category:SVG_chess_pieces/Standard)', fill: Color.BLACK)
                 statistics = text(layoutX: 600, layoutY: 892, text: "", font: '11pt sanserif', fill: Color.BLACK)
-                statistics2 = text(layoutX: 856, layoutY: 892, text: "", font: '11pt sanserif', fill: Color.BLACK)
+                statistics2 = text(layoutX: 840, layoutY: 892, text: "", font: '11pt sanserif', fill: Color.BLACK)
 
             }
         }

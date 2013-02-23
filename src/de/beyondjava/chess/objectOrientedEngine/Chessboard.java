@@ -32,7 +32,7 @@ public class Chessboard extends ChessboardBasis {
         long start = System.nanoTime();
         int[] bestMoves = activePlayerIsWhite ? findBestWhiteMoves(6, 7, true) : findBestBlackMoves(6, 7, false);
         long dauer = System.nanoTime() - start;
-        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated positions:" + NumberFormat.getInstance().format( Chessboard.evaluatedPositions));
+        System.out.println("Calculation took " + ((dauer / 1000) / 1000.0d) + "ms Evalutated POSITIONAL_VALUES:" + NumberFormat.getInstance().format( Chessboard.evaluatedPositions));
         System.out.println("evaluation took  " + ((Chessboard.totalTime/1000)/1000) + " ms");
         System.out.println("Average evaluation: " + Chessboard.totalTime/evaluatedPositions + " ns") ;
         int move = bestMoves[0];

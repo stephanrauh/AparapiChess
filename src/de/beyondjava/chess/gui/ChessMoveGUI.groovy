@@ -196,43 +196,40 @@ class ChessMoveGUI {
         long totalTime = System.nanoTime() - start;
         String s = "";
         def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
-        def calc = NumberFormat.getInstance().format(((totalTime / 1000000) / 1000.0d))
-        def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 1000000)) / 1000.0d))
-        def copy = NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard / 1000000) / 1000))
+        def calc = NumberFormat.getInstance().format(((int)(totalTime / 100000000)) / 10.0d)
+        def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 100000000)) / 10.0d))
         def avg = NumberFormat.getInstance().format(((int) (LinearChessboard.totalTime / LinearChessboard.evaluatedPositions)) / 1000.0d)
         def cores = Runtime.getRuntime().availableProcessors()
         s += "Calculation took $calc s (* $cores cores)\n"
         s += "evaluation took  $eval s\n";
-        s += "copying boards took  $copy s\n";
         s += "Average evaluation: $avg µs\n";
         statistics.text = s;
-        s = "Evalutated positions:" + evalPos + "\n";
-        s += "Depth: ${LinearChessboard.depth}\n"
-        s += "Width: ${LinearChessboard.width}\n"
-        s += LinearChessboard.multithreading ? "multithreading" : "single threading"
+        s = "positions evalutated:" + evalPos + "\n";
         statistics2.text = s
     }
 
 
     private void addMoveNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
         String text = getNotation(board, toRow, toColumn, fromRow, fromColumn)
-        if (board.activePlayerIsWhite) whiteMoves.text += "${board.moveCount}.$text\n" else blackMoves.text += "$text\n"
+        if (board.activePlayerIsWhite) whiteMoves.text += "${board.moveCount}. $text\n" else blackMoves.text += "$text\n"
     }
 
     private String getNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
+        boolean enPassant=false;
         int capturedPiece = board.getChessPiece(toRow, toColumn)
         if (capturedPiece == -1) {
+            enPassant=true;
             if (board.activePlayerIsWhite) {
-                capturedPiece = ChessConstants.w_bauer
+                capturedPiece = ChessConstants.W_PAWN
             } else {
-                capturedPiece = ChessConstants.s_bauer
+                capturedPiece = ChessConstants.B_PAWN
             }
         }
         Move m = new Move(board.getChessPiece(fromRow, fromColumn), fromRow, fromColumn, toRow, toColumn, 0, false, 0 != capturedPiece, capturedPiece)
         LinearChessboard newBoard = board.moveChessPiece(m)
         boolean check = board.activePlayerIsWhite ? newBoard.isBlackKingThreatened : newBoard.isWhiteKingThreatened
         m.opponentInCheck = check
-        return m.getNotation()
+        return m.getNotation(enPassant)
     }
 
     public void redraw(ImageView[][] fields, LinearChessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {

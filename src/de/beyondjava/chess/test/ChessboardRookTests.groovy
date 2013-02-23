@@ -13,9 +13,9 @@ import de.beyondjava.chess.common.Piece
 class ChessboardRookTests extends GroovyTestCase {
     void testKingThreatenedByRook1()
     {
-        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.s_koenig)
-        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.w_koenig)
-        Piece whitePawn = new Piece(row: 1, column: 3, piece:  Piece.w_turm)
+        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.B_KING)
+        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.W_KING)
+        Piece whitePawn = new Piece(row: 1, column: 3, piece:  Piece.W_ROOK)
         Chessboard b = new Chessboard(true, whiteKing, blackKing, whitePawn)
         assertEquals(false, b.isBlackKingThreatened())
         assertEquals(false, b.isWhiteKingThreatened())
@@ -23,9 +23,9 @@ class ChessboardRookTests extends GroovyTestCase {
 
     void testKingThreatenedByRook2()
     {
-        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.s_koenig)
-        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.w_koenig)
-        Piece whitePawn = new Piece(row: 1, column: 4, piece:  Piece.w_turm)
+        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.B_KING)
+        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.W_KING)
+        Piece whitePawn = new Piece(row: 1, column: 4, piece:  Piece.W_ROOK)
         Chessboard b = new Chessboard(true, whiteKing, blackKing, whitePawn)
         assertEquals(true, b.isBlackKingThreatened())
         assertEquals(false, b.isWhiteKingThreatened())
@@ -33,9 +33,9 @@ class ChessboardRookTests extends GroovyTestCase {
 
     void testKingThreatenedByRook3()
     {
-        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.s_koenig)
-        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.w_koenig)
-        Piece whitePawn = new Piece(row: 1, column: 5, piece:  Piece.w_turm)
+        Piece blackKing = new Piece(row: 0, column: 4, piece: Piece.B_KING)
+        Piece whiteKing = new Piece(row: 7, column: 4, piece:  Piece.W_KING)
+        Piece whitePawn = new Piece(row: 1, column: 5, piece:  Piece.W_ROOK)
         Chessboard b = new Chessboard(true, whiteKing, blackKing, whitePawn)
         assertEquals(false, b.isBlackKingThreatened())
         assertEquals(false, b.isWhiteKingThreatened())

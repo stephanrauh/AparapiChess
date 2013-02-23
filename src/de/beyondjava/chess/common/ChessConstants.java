@@ -10,21 +10,21 @@ package de.beyondjava.chess.common;
 public interface ChessConstants {
     public static final boolean s_WHITE = true;
     public static final boolean s_BLACK = false;
-    public static final int s_empty = 0;
-    public static final int w_empty = 1;
-    public static final int s_bauer = 2;
-    public static final int w_bauer = 4;
-    public static final int s_turm = 6;
-    public static final int w_turm = 8;
-    public static final int s_springer = 10;
-    public static final int w_springer = 12;
-    public static final int s_laeufer = 14;
-    public static final int w_laeufer = 16;
-    public static final int s_dame = 18;
-    public static final int w_dame = 20;
-    public static final int s_koenig = 22;
-    public static final int w_koenig = 24;
-    public static final int[][] initialBoard = {{6, 10, 14, 18, 22, 14, 10, 6},
+    public static final int B_EMPTY = 0;
+    public static final int W_EMPTY = 1;
+    public static final int B_PAWN = 2;
+    public static final int W_PAWN = 4;
+    public static final int B_ROOK = 6;
+    public static final int W_ROOK = 8;
+    public static final int B_KNIGHT = 10;
+    public static final int W_KNIGHT = 12;
+    public static final int B_BISHOP = 14;
+    public static final int W_BISHOP = 16;
+    public static final int B_QUEEN = 18;
+    public static final int W_QUEEN = 20;
+    public static final int B_KING = 22;
+    public static final int W_KING = 24;
+    public static final int[][] INITIAL_BOARD = {{6, 10, 14, 18, 22, 14, 10, 6},
             {2, 2, 2, 2, 2, 2, 2, 2},
             {0, 0, 0, 0, 0, 0, 0, 0},
             {0, 0, 0, 0, 0, 0, 0, 0},
@@ -33,7 +33,7 @@ public interface ChessConstants {
             {4, 4, 4, 4, 4, 4, 4, 4},
             {8, 12, 16, 20, 24, 16, 12, 8}
     };
-    public static final int[] initialLinearBoard = {6, 10, 14, 18, 22, 14, 10, 6,
+    public static final int[] INITIAL_LINEAR_BOARD = {6, 10, 14, 18, 22, 14, 10, 6,
             2, 2, 2, 2, 2, 2, 2, 2,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -50,9 +50,9 @@ public interface ChessConstants {
             1000, 1000, 1000, 1000, // queens
             9999, 9999, 9999, 9999 // kings
     };
-    String[] columns = {"A", "B", "C", "D", "E", "F", "G", "H"};
-    String[] rows = {"8", "7", "6", "5", "4", "3", "2", "1"};
-    String[] pieceName = {"E" /* en passant */,
+    public static final String[] COLUMNS = {"A", "B", "C", "D", "E", "F", "G", "H"};
+    public static final String[] ROWS = {"8", "7", "6", "5", "4", "3", "2", "1"};
+    public static final String[] PIECE_NAME = {"E" /* en passant */,
             " ", " ", "P", "P", "P", "P",
             "R", "R", "R", "R",
             "N", "N", "N", "N",
@@ -61,7 +61,7 @@ public interface ChessConstants {
             "K", "K", "K", "K"};
 
 
-    public static final int[][] positions =
+    public static final int[][] POSITIONAL_VALUES =
                     {{0, 10, 20,  30,  30, 20, 10, 0},
                     {10, 20, 30,  40,  40, 30, 20, 10},
                     {15, 30, 60,  80,  80, 60, 30, 15},
@@ -71,7 +71,7 @@ public interface ChessConstants {
                     {10, 20, 30,  40,  40, 30, 20, 10},
                     { 0, 10, 20,  30,  30, 20, 10, 0},
             };
-    public static final int[][] whitePawnPositions =
+    public static final int[][] WHITE_PAWN_POSITION_VALUES =
             {{200, 200, 200, 200, 200, 200, 200, 200},
                     {55, 70, 110, 180, 180, 110, 70, 55},
                     {45, 60, 90, 160, 160, 90, 60, 45},
@@ -82,14 +82,11 @@ public interface ChessConstants {
                     {0, 0, 0, 0, 0, 0, 0, 0},
             };
 
-    public static final int[] doublePawnBonus = {50 /* n/a */,50 /* A+B */,
+    public static final int[] DOUBLE_PAWN_BONUS = {50 /* n/a */,50 /* A+B */,
             60 /* B+C */,
             70 /* C+D */,
             80 /* D+E */,
             70 /* E + F */,
             60 /* F + G */,
             50 /* G + H */};
-
-
-
 }
