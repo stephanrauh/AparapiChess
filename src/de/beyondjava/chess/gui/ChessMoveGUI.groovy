@@ -5,7 +5,11 @@ import de.beyondjava.chess.Exceptions.WhiteIsCheckMateException
 import de.beyondjava.chess.common.ChessConstants
 import de.beyondjava.chess.common.Move
 import de.beyondjava.chess.linearEngine.LinearChessboard
+import javafx.animation.KeyFrame
+import javafx.animation.Timeline
 import javafx.concurrent.Task
+import javafx.event.ActionEvent
+import javafx.event.EventHandler
 import javafx.scene.Cursor
 import javafx.scene.Scene
 import javafx.scene.control.CheckBox
@@ -13,6 +17,7 @@ import javafx.scene.control.ProgressIndicator
 import javafx.scene.control.Slider
 import javafx.scene.image.ImageView
 import javafx.scene.text.Text
+import javafx.util.Duration
 
 import java.text.NumberFormat
 /**
@@ -119,6 +124,18 @@ class ChessMoveGUI {
         board.multithreading=multithreadingCheckbox.selected
         board.width=widthSlider.value
         board.depth=depthSlider.value
+        final long start = System.nanoTime()
+
+        Timeline time = new Timeline();
+        time.setCycleCount(-1);
+        KeyFrame keyFrame = new KeyFrame(Duration.millis(200), new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent event) {
+                updateStatistics(start)
+            }
+        });
+
+        time.getKeyFrames().add(keyFrame);
+        time.playFromStart()
         Task<Void> task = new Task<Void>() {
             public Void call() {
                 try {
@@ -128,34 +145,18 @@ class ChessMoveGUI {
                     } else {
                         checkmate.text = "\nblack's thinking..."
                     }
-                    long start = System.nanoTime()
                     Move move
                     try {
                         move = board.findBestMove()
                     }
                     finally {
-                        long dauer = System.nanoTime() - start;
-                        String s = "";
-                        def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
-                        def calc = NumberFormat.getInstance().format(((dauer / 1000) / 1000.0d))
-                        def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 1000)) / 1000.0d))
-                        def copy = NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard / 1000) / 1000))
-                        def avg = NumberFormat.getInstance().format(((int) (LinearChessboard.totalTime / LinearChessboard.evaluatedPositions)) / 1000.0d)
-                        def cores = Runtime.getRuntime().availableProcessors()
-                        s += "Calculation took $calc ms (* $cores cores)\n"
-                        s += "evaluation took  $eval ms\n";
-                        s += "copying boards took  $copy ms\n";
-                        s += "Average evaluation: $avg µs\n";
-                        statistics.text = s;
-                        s = "Evalutated positions:" + evalPos + "\n";
-                        s += "Depth: ${LinearChessboard.depth}\n"
-                        s += "Width: ${LinearChessboard.width}\n"
-                        s += LinearChessboard.multithreading ? "multithreading" : "single threading"
-                        statistics2.text = s
+                        time.stop()
+                        updateStatistics(start)
                     }
                     if (null != move) {
                         addMoveNotation(board, move.toRow, move.toColumn, move.fromRow, move.fromColumn, whiteMoves, blackMoves)
                         board = board.moveChessPiece(move)
+                        redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
                         chessboard = board
                         history += board
                         whiteMoveHistory += whiteMoves.text
@@ -181,15 +182,37 @@ class ChessMoveGUI {
                     checkmate.text = "technical error\n" + p_error.getClass().getSimpleName()
                     p_error.printStackTrace()
                 }
-                redraw(fields, board, images, checkmate, whiteMoves, blackMoves)
                 chessScene.setCursor(Cursor.HAND)
             }
+
         };
         progress.visibleProperty().bind(task.runningProperty());
         new Thread(task).start()
         return board
 
     }
+    private void updateStatistics(long start) {
+
+        long totalTime = System.nanoTime() - start;
+        String s = "";
+        def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
+        def calc = NumberFormat.getInstance().format(((totalTime / 1000000) / 1000.0d))
+        def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 1000000)) / 1000.0d))
+        def copy = NumberFormat.getInstance().format(((LinearChessboard.totalTimeGetNewBoard / 1000000) / 1000))
+        def avg = NumberFormat.getInstance().format(((int) (LinearChessboard.totalTime / LinearChessboard.evaluatedPositions)) / 1000.0d)
+        def cores = Runtime.getRuntime().availableProcessors()
+        s += "Calculation took $calc s (* $cores cores)\n"
+        s += "evaluation took  $eval s\n";
+        s += "copying boards took  $copy s\n";
+        s += "Average evaluation: $avg µs\n";
+        statistics.text = s;
+        s = "Evalutated positions:" + evalPos + "\n";
+        s += "Depth: ${LinearChessboard.depth}\n"
+        s += "Width: ${LinearChessboard.width}\n"
+        s += LinearChessboard.multithreading ? "multithreading" : "single threading"
+        statistics2.text = s
+    }
+
 
     private void addMoveNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn, Text whiteMoves, Text blackMoves) {
         String text = getNotation(board, toRow, toColumn, fromRow, fromColumn)
