@@ -8,8 +8,8 @@ package de.beyondjava.chess.aparapiEngine.linearEngine;
 public abstract class AparapiChessboardsEvaluator extends AparapiChessboardsBoard {
 
 
-    protected void evaluateBoard() {
-        evaluateMaterialValue(0);
+    protected void evaluateBoard(int currentBoard) {
+        evaluateMaterialValue(currentBoard);
 //            evaluateFieldPositionalValue();
 //            findLegalMovesIgnoringCheck();
 //            evaluateMobility();

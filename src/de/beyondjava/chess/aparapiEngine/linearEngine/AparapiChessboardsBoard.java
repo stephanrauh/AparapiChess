@@ -9,23 +9,24 @@ import com.amd.aparapi.Kernel;
  * Time: 19:17
  */
 public abstract class AparapiChessboardsBoard extends Kernel {
-    public static final boolean s_WHITE = true;
-    public static final boolean s_BLACK = false;
-    public static final int B_EMPTY = 0;
-    public static final int W_EMPTY = 1;
-    public static final int B_PAWN = 2;
-    public static final int W_PAWN = 4;
-    public static final int B_ROOK = 6;
-    public static final int W_ROOK = 8;
-    public static final int B_KNIGHT = 10;
-    public static final int W_KNIGHT = 12;
-    public static final int B_BISHOP = 14;
-    public static final int W_BISHOP = 16;
-    public static final int B_QUEEN = 18;
-    public static final int W_QUEEN = 20;
-    public static final int B_KING = 22;
-    public static final int W_KING = 24;
-    public static final int[] INITIAL_BOARD = {6, 10, 14, 18, 22, 14, 10, 6,
+    public static final int MAXBOARDS = 10000;
+    public  final boolean s_WHITE = true;
+    public  final boolean s_BLACK = false;
+    public  final int B_EMPTY = 0;
+    public  final int W_EMPTY = 1;
+    public  final int B_PAWN = 2;
+    public  final int W_PAWN = 4;
+    public  final int B_ROOK = 6;
+    public  final int W_ROOK = 8;
+    public  final int B_KNIGHT = 10;
+    public  final int W_KNIGHT = 12;
+    public  final int B_BISHOP = 14;
+    public  final int W_BISHOP = 16;
+    public  final int B_QUEEN = 18;
+    public  final int W_QUEEN = 20;
+    public  final int B_KING = 22;
+    public  final int W_KING = 24;
+    public  final byte[] INITIAL_BOARD = {6, 10, 14, 18, 22, 14, 10, 6,
             2, 2, 2, 2, 2, 2, 2, 2,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -34,16 +35,7 @@ public abstract class AparapiChessboardsBoard extends Kernel {
             4, 4, 4, 4, 4, 4, 4, 4,
             8, 12, 16, 20, 24, 16, 12, 8
     };
-    public static final byte[] INITIAL_LINEAR_BOARD = {6, 10, 14, 18, 22, 14, 10, 6,
-            2, 2, 2, 2, 2, 2, 2, 2,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            4, 4, 4, 4, 4, 4, 4, 4,
-            8, 12, 16, 20, 24, 16, 12, 8
-    };
-    public static final int[] s_MATERIAL_VALUE = {0, 0, // empty fields
+    public  final int[] s_MATERIAL_VALUE = {0, 0, // empty fields
             100, 100, 100, 100, // pawns
             500, 500, 500, 500, // rooks,
             275, 275, 275, 275, // knights (Springer)
@@ -51,7 +43,7 @@ public abstract class AparapiChessboardsBoard extends Kernel {
             1000, 1000, 1000, 1000, // queens
             9999, 9999, 9999, 9999 // kings
     };
-    public static final int[] POSITIONAL_VALUES =
+    public  final int[] POSITIONAL_VALUES =
             {0, 10, 20, 30, 30, 20, 10, 0,
                     10, 20, 30, 40, 40, 30, 20, 10,
                     15, 30, 60, 80, 80, 60, 30, 15,
@@ -61,7 +53,7 @@ public abstract class AparapiChessboardsBoard extends Kernel {
                     10, 20, 30, 40, 40, 30, 20, 10,
                     0, 10, 20, 30, 30, 20, 10, 0
             };
-    public static final int[][] WHITE_PAWN_POSITION_VALUES =
+    public  final int[][] WHITE_PAWN_POSITION_VALUES =
             {{200, 200, 200, 200, 200, 200, 200, 200},
                     {55, 70, 110, 180, 180, 110, 70, 55},
                     {45, 60, 90, 160, 160, 90, 60, 45},
@@ -71,56 +63,56 @@ public abstract class AparapiChessboardsBoard extends Kernel {
                     {20, 30, 60, 40, 40, 60, 40, 30},
                     {0, 0, 0, 0, 0, 0, 0, 0},
             };
-    public static final int[] DOUBLE_PAWN_BONUS = {50 /* n/a */, 50 /* A+B */,
+    public  final int[] DOUBLE_PAWN_BONUS = {50 /* n/a */, 50 /* A+B */,
             60 /* B+C */,
             70 /* C+D */,
             80 /* D+E */,
             70 /* E + F */,
             60 /* F + G */,
             50 /* G + H */};
-    public boolean[] blackCastlingLeftImpossible = new boolean[40000];
-    public boolean[] blackCastlingRightImpossible = new boolean[40000];
-    public boolean[] whiteCastlingLeftImpossible = new boolean[40000];
-    public boolean[] whiteCastlingRightImpossible = new boolean[40000];
-    public boolean[] blackHasCastled = new boolean[40000];
-    public boolean[] whiteHasCastled = new boolean[40000];
-    public short[] moveCount = new short[40000];
-    public byte[] board = new byte[40000*64];
+    public boolean[] blackCastlingLeftImpossible = new boolean[MAXBOARDS];
+    public boolean[] blackCastlingRightImpossible = new boolean[MAXBOARDS];
+    public boolean[] whiteCastlingLeftImpossible = new boolean[MAXBOARDS];
+    public boolean[] whiteCastlingRightImpossible = new boolean[MAXBOARDS];
+    public boolean[] blackHasCastled = new boolean[MAXBOARDS];
+    public boolean[] whiteHasCastled = new boolean[MAXBOARDS];
+    public short[] moveCount = new short[MAXBOARDS];
+    public byte[] board = new byte[MAXBOARDS *64];
     public boolean[] activePlayerIsWhite;
-    public int[] canBeReachedByTheseWhitePieces = new int[40000*64];
-    public int[] canBeReachedByTheseBlackPieces = new int[40000*64];
-    public int[] whiteMaterialValue = new int[40000];
-    public int[] blackMaterialValue = new int[40000];
-    public int[] whiteExpectedLoss = new int[40000];
-    public int[] blackExpectedLoss = new int[40000];
+    public int[] canBeReachedByTheseWhitePieces = new int[MAXBOARDS *64];
+    public int[] canBeReachedByTheseBlackPieces = new int[MAXBOARDS *64];
+    public int[] whiteMaterialValue = new int[MAXBOARDS];
+    public int[] blackMaterialValue = new int[MAXBOARDS];
+    public int[] whiteExpectedLoss = new int[MAXBOARDS];
+    public int[] blackExpectedLoss = new int[MAXBOARDS];
     /**
      * Value of black pieces threatened by white pieces
      */
-    public int[] whitePotentialMaterialValue=new int[40000];
+    public int[] whitePotentialMaterialValue=new int[MAXBOARDS];
     /**
      * Value of white pieces threatened by black pieces
      */
-    public int[] blackPotentialMaterialValue=new int[40000];
-    public int[] whiteFieldPositionValue=new int[40000];
-    public int[] blackFieldPositionValue=new int[40000];
-    public int[] whiteMoveValue=new int[40000];
-    public int[] blackMoveValue=new int[40000];
-    public int[] whiteCoverageValue=new int[40000];
-    public int[] blackCoverageValue=new int[40000];
-    public boolean[] isWhiteKingThreatened = new boolean[40000];
-    public boolean[] isBlackKingThreatened = new boolean[40000];
-    public int[] whiteTotalValue=new int[40000];
-    public int[] blackTotalValue=new int[40000];
-    public int[] whiteMoves = new int[40000*128];
-    public byte[] numberOfWhiteMoves =new byte[40000];
-    public int[] blackMoves = new int[40000*128];
-    public byte[] numberOfBlackMoves =new byte[40000];
-    public boolean[] checkmate = new boolean[40000];
+    public int[] blackPotentialMaterialValue=new int[MAXBOARDS];
+    public int[] whiteFieldPositionValue=new int[MAXBOARDS];
+    public int[] blackFieldPositionValue=new int[MAXBOARDS];
+    public int[] whiteMoveValue=new int[MAXBOARDS];
+    public int[] blackMoveValue=new int[MAXBOARDS];
+    public int[] whiteCoverageValue=new int[MAXBOARDS];
+    public int[] blackCoverageValue=new int[MAXBOARDS];
+    public boolean[] isWhiteKingThreatened = new boolean[MAXBOARDS];
+    public boolean[] isBlackKingThreatened = new boolean[MAXBOARDS];
+    public int[] whiteTotalValue=new int[MAXBOARDS];
+    public int[] blackTotalValue=new int[MAXBOARDS];
+    public int[] whiteMoves = new int[MAXBOARDS *128];
+    public byte[] numberOfWhiteMoves =new byte[MAXBOARDS];
+    public int[] blackMoves = new int[MAXBOARDS *128];
+    public byte[] numberOfBlackMoves =new byte[MAXBOARDS];
+    public boolean[] checkmate = new boolean[MAXBOARDS];
 
 
-    protected void startGame()
+    protected void startGame(int currentBoard)
     {
-        System.arraycopy(INITIAL_BOARD, 0, board, 0, 64);
+        System.arraycopy(INITIAL_BOARD, 0, board,currentBoard<<6, 64);
     }
 
     protected int getChessPiece(int currentBoard, int row, int column) {
