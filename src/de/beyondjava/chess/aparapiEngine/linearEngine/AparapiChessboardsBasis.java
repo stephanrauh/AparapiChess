@@ -3,8 +3,6 @@ package de.beyondjava.chess.aparapiEngine.linearEngine;
 import com.amd.aparapi.Kernel;
 import com.amd.aparapi.Range;
 
-import java.text.NumberFormat;
-
 
 /**
  * Represents the chess board and provide a couple of methods on possible moves.
@@ -120,30 +118,20 @@ public class AparapiChessboardsBasis extends Kernel {
     public byte[] numberOfBlackMoves =new byte[40000];
     public boolean[] checkmate = new boolean[40000];
 
-    public void startGame()
-    {
-        board[0]=INITIAL_LINEAR_BOARD;
-    }
-
     public static void main(String... args) {
-        long anfang=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-        System.out.println("Anfang: " + NumberFormat.getInstance().format(anfang));
-        AparapiChessboardsBasis[] x = new AparapiChessboardsBasis[100];
-        for (int i = 0; i < x.length; i++)
-        {
-        x[i] = new AparapiChessboardsBasis();
-            long verbraucht=Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
-            System.out.println(i + " Verbraucht: " +NumberFormat.getInstance().format(verbraucht));
-        }
         AparapiChessboardsBasis a = new AparapiChessboardsBasis();
         a.run();
         for (int i = 0; i < 1000; i++) {
-            eval(a);
+            evaluateParallel(a);
         }
 
     }
+    public void run() {
+        evaluateBoard();
+    }
 
-    private static void eval(AparapiChessboardsBasis a) {
+
+    private static void evaluateParallel(AparapiChessboardsBasis a) {
         long start = System.nanoTime();
         Range range = Range.create(1000000);
         a.execute(range);
@@ -151,11 +139,76 @@ public class AparapiChessboardsBasis extends Kernel {
         System.out.println(((end - start) / 1000) / 1000.0d + " ms");
     }
 
+    public void startGame()
+    {
+        board[0]=INITIAL_LINEAR_BOARD;
+    }
+
+
     private void evaluateBoard() {
-
+//            evaluateFieldPositionalValue();
+//            findLegalMovesIgnoringCheck();
+//            evaluateMobility();
+//            evaluateThreats();
+//            whiteTotalValue = (whiteMaterialValue-whiteExpectedLoss) * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
+//            blackTotalValue = (blackMaterialValue-blackExpectedLoss) * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
     }
 
-    public void run() {
-        evaluateBoard();
+
+    public int getChessPiece(int currentBoard, int row, int column) {
+        return board[currentBoard][(row<<3)+column];
     }
+
+    protected boolean isWhitePiece(int piece) {
+        if (piece < 2) {
+            return false;
+        }
+        return (((piece / 2) % 2) == 0);
+    }
+
+    protected boolean isBlackPiece(int piece) {
+        if (piece < 2) {
+            return false;
+        }
+        return (((piece / 2) % 2) == 1);
+    }
+
+    protected boolean isActivePlayersPiece(int currentBoard, int piece) {
+        return activePlayerIsWhite[currentBoard] == isWhitePiece(piece);
+    }
+
+    protected boolean isInsideBoard(int row, int column) {
+        if (row < 0 || row > 7) return false;
+        if (column < 0 || column > 7) return false;
+        return true;
+    }
+
+    protected boolean isEmptyField(int currentBoard, int row, int column) {
+        if (!isInsideBoard(row, column)) return false;
+        if (getChessPiece(currentBoard, row, column) <= 0) return true;
+        return false;
+    }
+
+    protected boolean isOpponentsPiece(int currentBoard, int row, int column, boolean p_activePlayerIsWhite) {
+        if (!isInsideBoard(row, column)) return false;
+        if (getChessPiece(currentBoard, row, column) <= 0) return false;
+        if (p_activePlayerIsWhite) {
+            return (isBlackPiece(getChessPiece(currentBoard, row, column)));
+        } else {
+            return (isWhitePiece(getChessPiece(currentBoard, row, column)));
+        }
+    }
+
+    protected boolean isEmptyOrCanBeCaptured(int currentBoard, int row, int column, boolean p_activePlayerIsWhite) {
+        if (!isInsideBoard(row, column)) return false;
+        int piece = getChessPiece(currentBoard, row, column);
+        if (piece <= 0) return true;
+        if (p_activePlayerIsWhite) {
+            return (isBlackPiece(piece));
+        } else {
+            return (isWhitePiece(piece));
+        }
+    }
+
+
 }
