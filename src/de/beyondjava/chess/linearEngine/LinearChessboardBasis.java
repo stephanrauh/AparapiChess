@@ -223,7 +223,6 @@ public class LinearChessboardBasis implements ChessConstants {
     }
 
     public int getChessPiece(int row, int column) {
-//        System.out.println("Row: " + row + " Col: " + column + " Cell: " + (((row<<3))+column));
         return board[(row<<3)+column];
     }
 
