@@ -1,4 +1,5 @@
 package de.beyondjava.chess.gui
+
 import de.beyondjava.chess.Exceptions.BlackIsCheckMateException
 import de.beyondjava.chess.Exceptions.EndOfGameException
 import de.beyondjava.chess.Exceptions.WhiteIsCheckMateException
@@ -20,6 +21,7 @@ import javafx.scene.text.Text
 import javafx.util.Duration
 
 import java.text.NumberFormat
+
 /**
  * This class tries to make sense out of the users mouse clicks.
  */
@@ -121,9 +123,9 @@ class ChessMoveGUI {
     }
 
     private LinearChessboard opponentsMove(LinearChessboard board, Text whiteMoves, Text blackMoves, Text checkmate, ImageView[][] fields, ChessImages images) {
-        board.multithreading=multithreadingCheckbox.selected
-        board.width=widthSlider.value
-        board.depth=depthSlider.value
+        board.multithreading = multithreadingCheckbox.selected
+        board.width = widthSlider.value
+        board.depth = depthSlider.value
         final long start = System.nanoTime()
 
         Timeline time = new Timeline();
@@ -191,12 +193,13 @@ class ChessMoveGUI {
         return board
 
     }
+
     private void updateStatistics(long start) {
 
         long totalTime = System.nanoTime() - start;
         String s = "";
         def evalPos = NumberFormat.getInstance().format(LinearChessboard.evaluatedPositions)
-        def calc = NumberFormat.getInstance().format(((int)(totalTime / 100000000)) / 10.0d)
+        def calc = NumberFormat.getInstance().format(((int) (totalTime / 100000000)) / 10.0d)
         def eval = NumberFormat.getInstance().format((((int) (LinearChessboard.totalTime / 100000000)) / 10.0d))
         def avg = NumberFormat.getInstance().format(((int) (LinearChessboard.totalTime / LinearChessboard.evaluatedPositions)) / 1000.0d)
         def cores = Runtime.getRuntime().availableProcessors()
@@ -215,10 +218,10 @@ class ChessMoveGUI {
     }
 
     private String getNotation(LinearChessboard board, int toRow, int toColumn, int fromRow, int fromColumn) {
-        boolean enPassant=false;
+        boolean enPassant = false;
         int capturedPiece = board.getChessPiece(toRow, toColumn)
         if (capturedPiece == -1) {
-            enPassant=true;
+            enPassant = true;
             if (board.activePlayerIsWhite) {
                 capturedPiece = ChessConstants.W_PAWN
             } else {
@@ -230,6 +233,17 @@ class ChessMoveGUI {
         boolean check = board.activePlayerIsWhite ? newBoard.isBlackKingThreatened : newBoard.isWhiteKingThreatened
         m.opponentInCheck = check
         return m.getNotation(enPassant)
+    }
+
+    public void newGame() {
+        chessboard = new LinearChessboard()
+        redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves)
+        history = [new LinearChessboard()]
+        whiteMoveHistory = []
+        whiteMoves.text = ""
+        blackMoveHistory = []
+        blackMoves.text = ""
+        redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves)
     }
 
     public void redraw(ImageView[][] fields, LinearChessboard board, ChessImages images, Text checkmate, Text whiteMoves, Text blackMoves) {
@@ -269,6 +283,8 @@ class ChessMoveGUI {
                 blackMoveHistory = []
                 blackMoves.text = ""
             }
+            chessboard=last;
+            redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves)
             return last;
         } else return board
     }

@@ -17,8 +17,8 @@ uiElements.with {
 
                 toolBar(prefWidth: 1100) {
                     button(text: "flip board", onAction: { chessboard = opponentsMove(chessboard, whiteMoves, blackMoves, checkmate, fields, images) })
-                    button(text: "new game", onAction: { chessboard = new LinearChessboard(); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
-                    button(text: "back", onAction: { chessboard = lastMove(chessboard, whiteMoves, blackMoves); redraw(fields, chessboard, images, checkmate, whiteMoves, blackMoves) })
+                    button(text: "new game", onAction: { newGame(); })
+                    button(text: "back", onAction: { chessboard = lastMove(chessboard, whiteMoves, blackMoves);  })
                     text(text: " Calculation depth:")
                     depthSlider= slider(min: 2, max: 10, value: LinearChessboard.depth, orientation: "horizontal", showTickMarks: true, prefWidth: 200, snapToTicks: true, majorTickUnit: 2, minorTickCount: 1, showTickLabels: true)
                     text(text: " Calculation width:")
