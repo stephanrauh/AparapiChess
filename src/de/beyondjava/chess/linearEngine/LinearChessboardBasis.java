@@ -56,6 +56,8 @@ public class LinearChessboardBasis implements ChessConstants {
     public int numberOfBlackMoves = 0;      // effectively final
     public boolean stalemate = false;
     public boolean checkmate = false;
+    public int epColumn=-1;
+    public int epRow=-1;
 
     private LinearChessboardBasis(boolean activePlayerIsWhite, int[] board, int oldMoveCount) {
         this.activePlayerIsWhite = activePlayerIsWhite;
@@ -128,28 +130,31 @@ public class LinearChessboardBasis implements ChessConstants {
 //        evaluateMaterialValue();  // DEBUG
         whiteTotalValue = (whiteMaterialValue-whiteExpectedLoss) * 10 + (whitePotentialMaterialValue >> 2) + whiteFieldPositionValue + whiteMoveValue + whiteCoverageValue;
         blackTotalValue = (blackMaterialValue-blackExpectedLoss) * 10 + (blackPotentialMaterialValue >> 2) + blackFieldPositionValue + blackMoveValue + blackCoverageValue;
+        if (movedPiece == W_PAWN) {
+            if (fromRow - toRow == 2)
+            {
+                epColumn=toColumn;
+                epRow=fromRow-1;
+            }
+        }
+        else if (movedPiece==B_PAWN)
+        {
+            if (fromRow - toRow == -2)
+            {
+                epColumn=toColumn;
+                epRow=fromRow+1;
+            }
+        }
 
     }
 
     private static int[] getNewBoard(LinearChessboardBasis oldBoard, int fromRow, int fromColumn, int toRow, int toColumn, int promotedPiece) {
         int[] newBoard = new int[64];
         System.arraycopy(oldBoard.board, 0, newBoard, 0, 64);
-        if (oldBoard.activePlayerIsWhite)
+        if (oldBoard.epColumn>0)
         {
-            for (int cell = 16; cell < 24; cell++) {
-                if (newBoard[cell] < 0) {
-                    newBoard[cell] = 0; // forget that en passant once was possible
-                }
-            }
-        } else {
-            for (int cell = 40; cell < 48; cell++) {
-                if (newBoard[cell] < 0) {
-                    newBoard[cell] = 0; // forget that en passant once was possible
-                }
-            }
+            newBoard[(oldBoard.epRow<<3)+oldBoard.epColumn]=0;
         }
-
-
 
         int piece = newBoard[(fromRow<<3)+fromColumn];
         if (piece== W_PAWN || piece== B_PAWN)
@@ -163,7 +168,9 @@ public class LinearChessboardBasis implements ChessConstants {
         }
         if (piece == W_PAWN) {
             if (fromRow - toRow == 2)
+            {
                 newBoard[((fromRow - 1)<<3)+toColumn] = -1; // allow for en passant
+            }
             if (toRow == 0) {
                 // promotion
                 if (promotedPiece > 0) {
