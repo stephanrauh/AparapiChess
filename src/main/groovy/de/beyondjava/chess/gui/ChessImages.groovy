@@ -10,6 +10,8 @@ import javafx.scene.image.Image
  * To change this template use File | Settings | File Templates.
  */
 class ChessImages {
+	boolean initizalized=false
+	
     String[] chessPiecesFileName = ['s_feld.png', 'w_feld.png',
             "s_s_bauer.png",
             "s_w_bauer.png",
@@ -58,10 +60,16 @@ class ChessImages {
     ChessImages() {
         boolean white = false; // note that position (0,0) is top left, in the black realm
         8.times { int row -> 8.times { int column -> baseColor[row][column] = (white ? 1 : 0); white = !white; }; white = !white; }
-        chessPiecesFileName.size().times { int i -> figureImages[i] = new Image("file:E:/this/Chess/ChessGUI/wikimediaimages/${chessPiecesFileName[i]}", 90, 90, true, true) };
     }
 
+	public void lazyInit() {
+		if (!initizalized) {
+			initizalized=true;
+			chessPiecesFileName.size().times { int i -> figureImages[i] = new Image("file:E:/this/Chess/ChessGUI/wikimediaimages/${chessPiecesFileName[i]}", 90, 90, true, true) };
+		}
+	}
     public Image getImage(int figure, int row, int column) {
+		lazyInit();
         int base = baseColor[row][column]
         if (figure < 0)
             return figureImages[base];
